@@ -2,7 +2,9 @@ package main.java.org.unibl.etf.models.passangers;
 
 import main.java.org.unibl.etf.Simulation;
 
-public class Suitcase {
+import java.io.Serializable;
+
+public class Suitcase implements Serializable {
     private boolean notAllowedStuff;
 
     public Suitcase(){

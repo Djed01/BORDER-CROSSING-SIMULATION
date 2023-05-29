@@ -5,7 +5,7 @@ import main.java.org.unibl.etf.Simulation;
 import java.text.DecimalFormat;
 import java.util.Random;
 
-public class Truck extends Vehicle{
+public class Truck extends Vehicle implements ICargoVehicle {
     public static final int PROBABILITY_OF_DOCUMENT_GENERATION = 50;
     public static final int PROBABILITY_OF_OVERLOADING = 20;
 
@@ -51,5 +51,14 @@ public class Truck extends Vehicle{
 
     public double getActualWeight() {
         return actualWeight;
+    }
+
+    @Override
+    public String toString() {
+        return "Truck{" + "ID="+getVehicleId()+
+                " ,needToGenerateDocumentation=" + needToGenerateDocumentation +
+                ", declaredWeight=" + declaredWeight +
+                ", actualWeight=" + actualWeight +
+                '}';
     }
 }

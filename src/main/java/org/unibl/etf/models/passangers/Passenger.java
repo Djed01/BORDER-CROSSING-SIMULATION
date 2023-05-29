@@ -2,7 +2,9 @@ package main.java.org.unibl.etf.models.passangers;
 
 import main.java.org.unibl.etf.Simulation;
 
-public class Passenger {
+import java.io.Serializable;
+
+public class Passenger implements Serializable {
     private String name;
     private String surname;
     private IdentificationDocument identificationDocument;
@@ -40,5 +42,13 @@ public class Passenger {
         return surname;
     }
 
+
+    @Override
+    public String toString() {
+        return "Passenger{" +
+                "name='" + name + '\'' +
+                ", surname='" + surname + '\''+
+                '}';
+    }
 
 }
