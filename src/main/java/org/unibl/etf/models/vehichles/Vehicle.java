@@ -3,27 +3,33 @@ package main.java.org.unibl.etf.models.vehichles;
 import main.java.org.unibl.etf.Simulation;
 import main.java.org.unibl.etf.models.passangers.Driver;
 import main.java.org.unibl.etf.models.passangers.Passenger;
-import main.java.org.unibl.etf.models.terminals.TruckCustomsTerminal;
-import main.java.org.unibl.etf.models.terminals.TruckPoliceTerminal;
+import main.java.org.unibl.etf.models.terminals.CustomsTerminal;
+import main.java.org.unibl.etf.models.terminals.PoliceTerminal;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.SortedMap;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static main.java.org.unibl.etf.Main.simulation;
 
 public abstract class Vehicle extends Thread{
-    private boolean isFinished = false;
-    private int x;
-    private int y;
+    protected boolean isFinished = false;
+
+    protected Color color;
+    protected int x;
+    protected int y;
+
+    protected boolean processedAtPolice = false;
+    protected boolean processedAtCustoms = false;
     private static int counter = 0;
-    private int vehicleId = 0;
+    protected int vehicleId = 0;
     private int numOfPassengers;
     private List<Passenger> passengers = new ArrayList<>();
 
-    public final ReentrantLock LOCK = new ReentrantLock();
+    public static final ReentrantLock LOCK = new ReentrantLock();
 
     public Vehicle(int maxNumOfPassengers) {
         Random random = new Random();
@@ -45,6 +51,14 @@ public abstract class Vehicle extends Thread{
         return passengers;
     }
 
+    public Color getColor() {
+        return color;
+    }
+
+    public String getLabel() {
+        return getClass().getSimpleName().substring(0, 1);
+    }
+
     public int getVehicleId() {
         return vehicleId;
     }
@@ -54,63 +68,133 @@ public abstract class Vehicle extends Thread{
         this.y = y;
     }
 
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
     @Override
     public void run(){
         while(!isFinished) {
-            synchronized (LOCK) {
-                if (Simulation.MATRIX[y + 1][x] == null && this.y != Simulation.POLICE_TERMINAL_ROW - 2) {
-                    Simulation.MATRIX[y][x] = null;
-                    Simulation.MATRIX[y + 1][x] = this;
-                    this.y++;
-                    System.out.println("Vehicle " + this.vehicleId + " moved to [" + this.y + "] [" + this.x+"]");
-                    LOCK.notifyAll();
-                } else if (this.y == Simulation.POLICE_TERMINAL_ROW - 2) {
-                    if (this instanceof ICargoVehicle) {
-                        if(Simulation.MATRIX[y+2][Simulation.TRUCK_POLICE_TERMINAL_COLUMN] instanceof TruckPoliceTerminal
-                            && Simulation.MATRIX[y+1][Simulation.TRUCK_POLICE_TERMINAL_COLUMN] == null){
+            try {
+                Thread.sleep(100);
+            }catch (InterruptedException ex){
+                Logger.getLogger(Vehicle.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            if (Simulation.MATRIX[y + 1][x] == null && this.y < Simulation.POLICE_TERMINAL_ROW - 2) {
+                if(y>=45) {
+                    // Update GUI
+                    synchronized (LOCK) {
+                        simulation.getRemoveVehicle().accept(this);
+                        Simulation.MATRIX[y + 1][x] = this;
+                        Simulation.MATRIX[y][x] = null;
+                        this.y++;
+                        simulation.getAddVehicle().accept(this);
+                        System.out.println("Vehicle " + this.vehicleId + " moved to [" + this.y + "] [" + this.x + "]");
+                        LOCK.notifyAll();
+                    }
+                }else if(y==44){
+                    synchronized (LOCK) {
+                        Simulation.MATRIX[y + 1][x] = this;
+                        Simulation.MATRIX[y][x] = null;
+                        this.y++;
+                        simulation.getAddVehicle().accept(this);
+                        System.out.println("Vehicle " + this.vehicleId + " moved to [" + this.y + "] [" + this.x + "]");
+                        LOCK.notifyAll();
+                    }
+                }else {
+                    synchronized (LOCK) {
+                        Simulation.MATRIX[y + 1][x] = this;
+                        Simulation.MATRIX[y][x] = null;
+                        this.y++;
+                        System.out.println("Vehicle " + this.vehicleId + " moved to [" + this.y + "] [" + this.x + "]");
+                        LOCK.notifyAll();
+                    }
+                }
+            } else if (this.y == Simulation.POLICE_TERMINAL_ROW - 2) {
+                if(Simulation.MATRIX[y+2][0] instanceof PoliceTerminal && Simulation.MATRIX[y+2][2] instanceof PoliceTerminal){
+                    if(Simulation.MATRIX[y+1][0] == null){
+                        synchronized (LOCK) {
+                            simulation.getRemoveVehicle().accept(this);
+                            Simulation.MATRIX[y + 1][0] = this;
                             Simulation.MATRIX[y][x] = null;
-                            Simulation.MATRIX[y+1][Simulation.TRUCK_POLICE_TERMINAL_COLUMN] = this;
-                            this.x = Simulation.TRUCK_POLICE_TERMINAL_COLUMN;
+                            this.x = 0;
                             this.y++;
-                            System.out.println("Vehicle " + this.vehicleId + " moved to [" + this.y + "] [" + this.x+"]");
-                            // TODO:Update GUI
+                            simulation.getAddVehicle().accept(this);
+                            System.out.println("Vehicle " + this.vehicleId + " moved to [" + this.y + "] [" + this.x + "]");
                             LOCK.notifyAll();
                         }
-                    } else {
-                        //TODO: Other vehicles movement
-                    }
-                } else if(this.y == Simulation.POLICE_TERMINAL_ROW-1){
-                    // Finished checking on police terminal
-                    if(this instanceof ICargoVehicle){
-                        TruckPoliceTerminal truckPoliceTerminal = (TruckPoliceTerminal)(Simulation.MATRIX[y+1][Simulation.TRUCK_POLICE_TERMINAL_COLUMN]);
-                        truckPoliceTerminal.checkPassengers(this);
-                        System.out.println("Vehicle " + this.vehicleId + " finished checking at Police terminal");
-                        if(Simulation.MATRIX[y+2][x] == null){
+                    }else if(Simulation.MATRIX[y+1][2] == null){
+                        synchronized (LOCK) {
+                            simulation.getRemoveVehicle().accept(this);
+                            Simulation.MATRIX[y + 1][2] = this;
                             Simulation.MATRIX[y][x] = null;
-                            Simulation.MATRIX[y+2][x] = this;
-                            this.y = y+2;
-                            System.out.println("Vehicle " + this.vehicleId + " moved to [" + this.y + "] [" + this.x+"]");
+                            this.x = 2;
+                            this.y++;
+                            simulation.getAddVehicle().accept(this);
+                            System.out.println("Vehicle " + this.vehicleId + " moved to [" + this.y + "] [" + this.x + "]");
                             LOCK.notifyAll();
-                        }else{
-                            try{
-                                LOCK.wait();
-                            } catch (InterruptedException e) {
-                                Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, e.fillInStackTrace().toString());
-                            }
                         }
-                    }else{
-                        //TODO: Other vehicles movement
                     }
-                }else if(this.y == Simulation.CUSTOMS_TERMINAL_ROW-1){
-                    TruckCustomsTerminal truckCustomsTerminal = (TruckCustomsTerminal)(Simulation.MATRIX[Simulation.CUSTOMS_TERMINAL_ROW][x]);
-                    truckCustomsTerminal.checkPassengers(this);
-                    // Finished checking on customs terminal
-                    Simulation.MATRIX[y][x] = null;
-                    Simulation.MATRIX[y+2][x] = this;
-                    this.y = y+2;
-                    System.out.println("Vehicle " + this.vehicleId + " CROSSING BORDER");
+                    }
+
+
+            } else if(this.y == Simulation.POLICE_TERMINAL_ROW-1){
+                // Finished checking on police terminal
+                if(!this.processedAtPolice){
+                    PoliceTerminal policeTerminal = (PoliceTerminal)(Simulation.MATRIX[y+1][x]);
+                    policeTerminal.checkPassengers(this);
+                    System.out.println("Vehicle " + this.vehicleId + " finished checking at Police terminal");
+                    this.processedAtPolice = true;
+                }
+                if(Simulation.MATRIX[y+2][0] != null){
+                    synchronized (LOCK) {
+                        try {
+                            LOCK.wait();
+                        } catch (InterruptedException e) {
+                            Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, e.fillInStackTrace().toString());
+                        }
+                    }
+                }else {
+                    synchronized (LOCK) {
+                        simulation.getRemoveVehicle().accept(this);
+                        Simulation.MATRIX[y + 2][0] = this;
+                        Simulation.MATRIX[y][x] = null;
+                        this.y = y + 2;
+                        this.x = 0;
+                        simulation.getAddVehicle().accept(this);
+                        System.out.println("Vehicle " + this.vehicleId + " moved to [" + this.y + "] [" + this.x + "]");
+                        LOCK.notifyAll();
+                    }
+                }
+            }else if(this.y == Simulation.CUSTOMS_TERMINAL_ROW-1){
+
+                CustomsTerminal customsTerminal = (CustomsTerminal) (Simulation.MATRIX[Simulation.CUSTOMS_TERMINAL_ROW][x]);
+                customsTerminal.checkPassengers(this);
+                System.out.println("Vehicle " + this.vehicleId + " finished checking at Customs terminal");
+
+                // Finished checking on customs terminal
+                synchronized (LOCK){
+                simulation.getRemoveVehicle().accept(this);
+                Simulation.MATRIX[y+2][x] = this;
+                Simulation.MATRIX[y][x] = null;
+                this.y = y+2;
+                simulation.getAddVehicle().accept(this);
+                System.out.println("Vehicle " + this.vehicleId + " CROSSING BORDER");
+                isFinished = true;
                     LOCK.notifyAll();
-                    isFinished = true;
+                }
+            }else {
+                synchronized (LOCK){
+                    try {
+                        LOCK.wait();
+                    }catch (InterruptedException e){
+                        Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, e.fillInStackTrace().toString());
+                    }
                 }
             }
         }

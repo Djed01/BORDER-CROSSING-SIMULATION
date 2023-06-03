@@ -1,5 +1,6 @@
 package main.java.org.unibl.etf;
 
+import main.java.org.unibl.etf.gui.BorderCrossingFrame;
 import main.java.org.unibl.etf.models.terminals.CustomsTerminal;
 import main.java.org.unibl.etf.models.terminals.PoliceTerminal;
 import main.java.org.unibl.etf.models.terminals.TruckCustomsTerminal;
@@ -14,6 +15,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -31,6 +33,10 @@ public class Simulation {
     private static final int NUM_OF_BUSES = 5;
     private static final int NUM_OF_TRUCKS = 10;
     private static final int NUM_OF_PERSONAL_VEHICLES = 35;
+
+    private Consumer<Vehicle> addVehicle;
+    private Consumer<Vehicle> removeVehicle;
+    private final ArrayList<Vehicle> vehicles;
 
     public static Object[][] MATRIX;
     public static final int POLICE_TERMINAL_ROW = 51;
@@ -55,29 +61,42 @@ public class Simulation {
         MATRIX = new Object[55][5];
 //        Properties properties = loadProperties();
 //        boolean terminalOpen = Boolean.parseBoolean(properties.getProperty("policeTerminalIsInFunction1"));
-        ArrayList<Vehicle> vehicles = generateVehicles();
+        vehicles = generateVehicles();
         setVehicles(vehicles);
         setTerminals();
 
-        for(Vehicle vehicle:vehicles){
-            vehicle.start();
-        }
+
+
 
        // emptySerializationFolder();
     }
 
+    public void startThreads(){
+        for(Vehicle vehicle:vehicles){
+            vehicle.start();
+        }
+
+        for (Thread vehicleThread : vehicles) {
+            try {
+                vehicleThread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     private ArrayList<Vehicle> generateVehicles(){
         ArrayList<Vehicle> vehicles = new ArrayList<>();
-       /* for(int i = 0;i < NUM_OF_BUSES;i++){
+        for(int i = 0;i < NUM_OF_BUSES;i++){
             vehicles.add(new Bus());
-        }*/
-        for(int i=0;i<2;i++){
+        }
+        for(int i=0;i<NUM_OF_TRUCKS;i++){
             DecimalFormat df = new DecimalFormat("#.00");
             vehicles.add(new Truck( Double.parseDouble(df.format(random.nextDouble(9000)+1000))));
         }
-      /*  for(int i=0;i<NUM_OF_PERSONAL_VEHICLES;i++){
+        for(int i=0;i<NUM_OF_PERSONAL_VEHICLES;i++){
             vehicles.add(new PersonalVehicle());
-        }*/
+        }
         Collections.shuffle(vehicles);
         return vehicles;
     }
@@ -154,4 +173,20 @@ public class Simulation {
         deleteFiles(new File(CUSTOMS_RECORDS_FOLDER));
     }
 
+
+    public Consumer<Vehicle> getAddVehicle() {
+        return addVehicle;
+    }
+
+    public void setAddVehicle(Consumer<Vehicle> addVehicle) {
+        this.addVehicle = addVehicle;
+    }
+
+    public Consumer<Vehicle> getRemoveVehicle() {
+        return removeVehicle;
+    }
+
+    public void setRemoveVehicle(Consumer<Vehicle> removeVehicle) {
+        this.removeVehicle = removeVehicle;
+    }
 }
