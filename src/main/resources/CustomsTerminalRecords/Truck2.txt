@@ -1,1 +1,0 @@
-Truck has more weight than declared, removing truck: Truck{ID=2 ,needToGenerateDocumentation=false, declaredWeight=5219.85, actualWeight=6675.72}

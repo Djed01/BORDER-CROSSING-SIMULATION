@@ -11,6 +11,7 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static main.java.org.unibl.etf.Main.simulation;
 
 public class PoliceTerminal extends Terminal{
 
@@ -30,7 +31,9 @@ public class PoliceTerminal extends Terminal{
         } else {
             TIME_TO_CHECK_PASSENGER = 500;
         }
-        System.out.println("Checking passengers in vehicle: " + vehicle);
+       /* System.out.println("Checking passengers in vehicle: " + vehicle);*/
+
+        simulation.getAddMessage().accept("Checking passengers in vehicle: " + vehicle.getLabel() + " " + vehicle.getVehicleId());
         for (Passenger passenger : vehicle.getPassengers()) {
             System.out.println("Checking passenger: " + passenger);
             if (!passenger.hasValidIdentificationDocument()) {
@@ -56,14 +59,15 @@ public class PoliceTerminal extends Terminal{
         }
 
         if (passengersToRemove.size() > 0) {
-            try {
-                // Serialize data object to a file
-                ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(Simulation.SERIALIZATION_FOLDER + "Vehicle" + vehicle.getVehicleId() + ".ser"));
-                out.writeObject(passengersToRemove);
-                out.close();
-            } catch (Exception e) {
-                Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, e.fillInStackTrace().toString());
-            }
+            simulation.addVehicleToRemove(vehicle, passengersToRemove);
+//            try {
+//                // Serialize data object to a file
+//                ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(Simulation.SERIALIZATION_FOLDER + "Vehicle" + vehicle.getVehicleId() + ".ser"));
+//                out.writeObject(passengersToRemove);
+//                out.close();
+//            } catch (Exception e) {
+//                Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, e.fillInStackTrace().toString());
+//            }
         }
 
     }

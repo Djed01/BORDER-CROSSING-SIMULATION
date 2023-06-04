@@ -12,6 +12,8 @@ import java.awt.GridLayout;
 import java.lang.reflect.Field;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -61,8 +63,10 @@ public class BorderCrossingFrame extends JFrame {
         description.setHorizontalAlignment(JLabel.CENTER);
         this.getContentPane().add(description);
 
+
         Main.simulation.setAddVehicle(addVehicleConsumer);
         Main.simulation.setRemoveVehicle(removeVehicleConsumer);
+        Main.simulation.setAddMessage(addMessageConsumer);
     }
 
     //Prikaz automobila na GUI-u
@@ -76,7 +80,7 @@ public class BorderCrossingFrame extends JFrame {
     });
 
     //Uklanjanje figure sa GUI-a
-    Consumer<Vehicle> removeVehicleConsumer = (vehicle) ->{
+    Consumer<Vehicle> removeVehicleConsumer = (vehicle) -> {
         synchronized (matrixLabel) {
             JLabel labelUp = matrixLabel[vehicle.getY() - 45][vehicle.getX()];
             labelUp.setText("-");
@@ -85,7 +89,11 @@ public class BorderCrossingFrame extends JFrame {
         }
     };
 
-    private void setTerminals(){
+    Consumer<String> addMessageConsumer = (message) -> SwingUtilities.invokeLater(() -> {
+        description.setText(message);
+    });
+
+    private void setTerminals() {
         matrixLabel[6][0].setText("P1");
         matrixLabel[6][0].setOpaque(true);
         matrixLabel[6][0].setBackground(Color.cyan);
@@ -109,4 +117,6 @@ public class BorderCrossingFrame extends JFrame {
         matrixLabel[8][4].setOpaque(true);
         matrixLabel[8][4].setBackground(Color.gray);
     }
+
+
 }

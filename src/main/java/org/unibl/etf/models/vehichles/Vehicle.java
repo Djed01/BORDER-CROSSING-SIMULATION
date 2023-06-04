@@ -7,6 +7,7 @@ import main.java.org.unibl.etf.models.terminals.CustomsTerminal;
 import main.java.org.unibl.etf.models.terminals.PoliceTerminal;
 
 import java.awt.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -15,7 +16,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import static main.java.org.unibl.etf.Main.simulation;
 
-public abstract class Vehicle extends Thread{
+public abstract class Vehicle extends Thread implements Serializable {
     protected boolean isFinished = false;
 
     protected Color color;

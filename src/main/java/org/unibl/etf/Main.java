@@ -10,5 +10,6 @@ public class Main {
         BorderCrossingFrame borderCrossingFrame = new BorderCrossingFrame();
         borderCrossingFrame.setVisible(true);
         simulation.startThreads();
+        simulation.serializeVehicles(simulation.getVehiclesToRemove());
     }
 }

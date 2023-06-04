@@ -1,6 +1,7 @@
 package main.java.org.unibl.etf;
 
 import main.java.org.unibl.etf.gui.BorderCrossingFrame;
+import main.java.org.unibl.etf.models.passangers.Passenger;
 import main.java.org.unibl.etf.models.terminals.CustomsTerminal;
 import main.java.org.unibl.etf.models.terminals.PoliceTerminal;
 import main.java.org.unibl.etf.models.terminals.TruckCustomsTerminal;
@@ -10,10 +11,10 @@ import main.java.org.unibl.etf.models.vehichles.PersonalVehicle;
 import main.java.org.unibl.etf.models.vehichles.Truck;
 import main.java.org.unibl.etf.models.vehichles.Vehicle;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
+import java.sql.Time;
 import java.text.DecimalFormat;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.logging.FileHandler;
@@ -27,7 +28,7 @@ public class Simulation {
 
     public static final String SERIALIZATION_FOLDER = "src/main/resources/PoliceTerminalRecords/";
 
-    public static  final String CUSTOMS_RECORDS_FOLDER = "src/main/resources/CustomsTerminalRecords/";
+    public static final String CUSTOMS_RECORDS_FOLDER = "src/main/resources/CustomsTerminalRecords/";
 
 
     private static final int NUM_OF_BUSES = 5;
@@ -36,7 +37,12 @@ public class Simulation {
 
     private Consumer<Vehicle> addVehicle;
     private Consumer<Vehicle> removeVehicle;
+
+    private Consumer<String> addMessage;
     private final ArrayList<Vehicle> vehicles;
+
+    private HashMap<Vehicle,ArrayList<Passenger>> vehiclesToRemove;
+    private HashMap<Vehicle,ArrayList<Passenger>> trucksToRemove;
 
     public static Object[][] MATRIX;
     public static final int POLICE_TERMINAL_ROW = 51;
@@ -57,7 +63,9 @@ public class Simulation {
         }
     }
 
-    public Simulation(){
+    public Simulation() {
+        vehiclesToRemove = new HashMap<>();
+        trucksToRemove = new HashMap<>();
         MATRIX = new Object[55][5];
 //        Properties properties = loadProperties();
 //        boolean terminalOpen = Boolean.parseBoolean(properties.getProperty("policeTerminalIsInFunction1"));
@@ -66,13 +74,11 @@ public class Simulation {
         setTerminals();
 
 
-
-
-       // emptySerializationFolder();
+        // emptySerializationFolder();
     }
 
-    public void startThreads(){
-        for(Vehicle vehicle:vehicles){
+    public void startThreads() {
+        for (Vehicle vehicle : vehicles) {
             vehicle.start();
         }
 
@@ -85,40 +91,38 @@ public class Simulation {
         }
     }
 
-    private ArrayList<Vehicle> generateVehicles(){
+    private ArrayList<Vehicle> generateVehicles() {
         ArrayList<Vehicle> vehicles = new ArrayList<>();
-        for(int i = 0;i < NUM_OF_BUSES;i++){
+        for (int i = 0; i < NUM_OF_BUSES; i++) {
             vehicles.add(new Bus());
         }
-        for(int i=0;i<NUM_OF_TRUCKS;i++){
+        for (int i = 0; i < NUM_OF_TRUCKS; i++) {
             DecimalFormat df = new DecimalFormat("#.00");
-            vehicles.add(new Truck( Double.parseDouble(df.format(random.nextDouble(9000)+1000))));
+            vehicles.add(new Truck(Double.parseDouble(df.format(random.nextDouble(9000) + 1000))));
         }
-        for(int i=0;i<NUM_OF_PERSONAL_VEHICLES;i++){
+        for (int i = 0; i < NUM_OF_PERSONAL_VEHICLES; i++) {
             vehicles.add(new PersonalVehicle());
         }
         Collections.shuffle(vehicles);
         return vehicles;
     }
+
     public static boolean generateBool(int probability) {
-        if(probability == 0) {
+        if (probability == 0) {
             return false;
-        }
-        else if(probability == 100) {
+        } else if (probability == 100) {
             return true;
-        }
-        else {
+        } else {
             int random = (int) (Math.random() * 100);
-            if(random < probability) {
+            if (random < probability) {
                 return true;
-            }
-            else {
+            } else {
                 return false;
             }
         }
     }
 
-    private Properties loadProperties(){
+    private Properties loadProperties() {
         Properties properties = new Properties();
         FileInputStream fip;
         try {
@@ -130,18 +134,18 @@ public class Simulation {
         return properties;
     }
 
-    private void setVehicles(ArrayList<Vehicle> vehicles){
-        int i=0;
-        for(Vehicle vehicle:vehicles){
-            if(MATRIX[i][2]==null){
-                vehicle.setXY(2,i);
-                MATRIX[i][2]=vehicle;
+    private void setVehicles(ArrayList<Vehicle> vehicles) {
+        int i = 0;
+        for (Vehicle vehicle : vehicles) {
+            if (MATRIX[i][2] == null) {
+                vehicle.setXY(2, i);
+                MATRIX[i][2] = vehicle;
                 i++;
             }
         }
     }
 
-    private void setTerminals(){
+    private void setTerminals() {
         MATRIX[POLICE_TERMINAL_ROW][0] = new PoliceTerminal();
         MATRIX[POLICE_TERMINAL_ROW][2] = new PoliceTerminal();
         MATRIX[POLICE_TERMINAL_ROW][4] = new TruckPoliceTerminal();
@@ -182,6 +186,7 @@ public class Simulation {
         this.addVehicle = addVehicle;
     }
 
+
     public Consumer<Vehicle> getRemoveVehicle() {
         return removeVehicle;
     }
@@ -189,4 +194,38 @@ public class Simulation {
     public void setRemoveVehicle(Consumer<Vehicle> removeVehicle) {
         this.removeVehicle = removeVehicle;
     }
+
+    public void setAddMessage(Consumer<String> addMessage) {
+        this.addMessage = addMessage;
+    }
+
+    public synchronized Consumer<String> getAddMessage() {
+        return addMessage;
+    }
+
+
+    public synchronized void addVehicleToRemove(Vehicle vehicle, ArrayList<Passenger> passengers) {
+        vehiclesToRemove.put(vehicle, passengers);
+    }
+
+    public synchronized void addTruckToRemove(Vehicle vehicle, ArrayList<Passenger> passengers) {
+        trucksToRemove.put(vehicle, passengers);
+    }
+
+    public HashMap<Vehicle,ArrayList<Passenger>> getVehiclesToRemove(){
+        return vehiclesToRemove;
+    }
+
+    public void serializeVehicles(HashMap<Vehicle,ArrayList<Passenger>> vehiclesToRemove){
+        try {
+                // Serialize data object to a file
+                // TODO : Add date to file name
+                ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(Simulation.SERIALIZATION_FOLDER + System.currentTimeMillis() +"_vehicles.ser"));
+                out.writeObject(vehiclesToRemove);
+                out.close();
+            } catch (Exception e) {
+                Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, e.fillInStackTrace().toString());
+            }
+    }
+
 }
