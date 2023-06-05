@@ -19,24 +19,29 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+
 public class BorderCrossingFrame extends JFrame {
     private JPanel contentPane;
     private JLabel title;
-    private JLabel description;
+    private JTextArea console;
 
-    private JLabel matrixLabel[][];
+    private JLabel[][] matrixLabel;
+
+    private JButton showQueueButton;
+
+    private QueueFrame queueFrame;
 
 
     public BorderCrossingFrame() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setBounds(100, 100, 1073, 707);
+        setBounds(100, 100, 1100, 800);
         contentPane = new JPanel();
         contentPane.setLayout(null);
         setContentPane(contentPane);
 
         JPanel centralPanel = new JPanel(new GridLayout(10, 5));
         centralPanel.setBackground(Color.white);
-        centralPanel.setBounds(226, 83, 633, 478);
+        centralPanel.setBounds(233, 83, 633, 478);
         centralPanel.setVisible(true);
         matrixLabel = new JLabel[10][5];
         for (int i = 9; i >= 0; i--)
@@ -51,17 +56,36 @@ public class BorderCrossingFrame extends JFrame {
         this.getContentPane().add(centralPanel);
 
         title = new JLabel("Border Crossing Simulation");
-        title.setBounds(273, 0, 633, 72);
+        title.setBounds(233, 0, 633, 72);
         this.getContentPane().add(title);
         title.setForeground(new Color(161, 2, 2));
         title.setFont(new Font("Serif", Font.BOLD, 45));
         title.setVisible(true);
 
-        description = new JLabel("Opis");
-        description.setBounds(226, 574, 633, 83);
-        description.setVerticalAlignment(JLabel.CENTER);
-        description.setHorizontalAlignment(JLabel.CENTER);
-        this.getContentPane().add(description);
+        console = new JTextArea();
+        JScrollPane scrollPane = new JScrollPane(console);
+        scrollPane.setBounds(233, 600, 633, 150);
+        console.setEditable(false);
+        console.setVisible(true);
+        getContentPane().add(scrollPane);
+
+        queueFrame = new QueueFrame();
+        queueFrame.setVisible(false);
+
+        showQueueButton = new JButton("Show queue");
+        showQueueButton.setBounds(10, 150, 213, 72);
+        showQueueButton.addActionListener(e -> {
+            EventQueue.invokeLater(() -> {
+                try {
+                    queueFrame.setVisible(true);
+                } catch (Exception ex) {
+                    Logger.getLogger(BorderCrossingFrame.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            });
+        });
+        getContentPane().add(showQueueButton);
+
+        repaint();
 
 
         Main.simulation.setAddVehicle(addVehicleConsumer);
@@ -90,7 +114,7 @@ public class BorderCrossingFrame extends JFrame {
     };
 
     Consumer<String> addMessageConsumer = (message) -> SwingUtilities.invokeLater(() -> {
-        description.setText(message);
+        console.append(message + "\n");
     });
 
     private void setTerminals() {

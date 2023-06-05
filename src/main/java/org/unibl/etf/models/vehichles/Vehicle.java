@@ -100,6 +100,7 @@ public abstract class Vehicle extends Thread implements Serializable {
                     }
                 }else if(y==44){
                     synchronized (LOCK) {
+                        simulation.getRemoveQueueVehicle().accept(this);
                         Simulation.MATRIX[y + 1][x] = this;
                         Simulation.MATRIX[y][x] = null;
                         this.y++;
@@ -109,9 +110,11 @@ public abstract class Vehicle extends Thread implements Serializable {
                     }
                 }else {
                     synchronized (LOCK) {
+                        simulation.getRemoveQueueVehicle().accept(this);
                         Simulation.MATRIX[y + 1][x] = this;
                         Simulation.MATRIX[y][x] = null;
                         this.y++;
+                        simulation.getAddQueueVehicle().accept(this);
                         System.out.println("Vehicle " + this.vehicleId + " moved to [" + this.y + "] [" + this.x + "]");
                         LOCK.notifyAll();
                     }

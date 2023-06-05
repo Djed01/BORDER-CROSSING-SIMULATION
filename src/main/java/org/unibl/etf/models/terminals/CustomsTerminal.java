@@ -14,13 +14,23 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static main.java.org.unibl.etf.Main.simulation;
+
 public class CustomsTerminal extends Terminal{
+    private int terminalId = 0;
+    private String TERMINAL_NAME = "CUSTOMS TERMINAL ";
     public CustomsTerminal() {
         super();
     }
 
+    public CustomsTerminal(int id, boolean isInFunction) {
+        super(isInFunction);
+        this.terminalId = id;
+    }
+
     public CustomsTerminal(boolean isInFunction) {
         super(isInFunction);
+        terminalId++;
     }
 
     public void checkPassengers(Vehicle vehicle){
@@ -33,7 +43,8 @@ public class CustomsTerminal extends Terminal{
                 System.out.println("Checking passenger: " + passenger);
                 if(passenger.hasSuitcase()){
                     if(passenger.getSuitcase().hasNotAllowedStuff()){
-                        System.out.println("Passenger has not allowed stuff, removing passenger: " + passenger);
+                        simulation.getAddMessage().accept(TERMINAL_NAME+terminalId+": Passenger has not allowed stuff, removing passenger: " + passenger +"in vehicle: " + vehicle.getLabel() + " " + vehicle.getVehicleId());
+                        //System.out.println("Passenger has not allowed stuff, removing passenger: " + passenger);
                         passengersToRemove.add(passenger);
                         // TODO: Process passenger
                     }
@@ -66,6 +77,7 @@ public class CustomsTerminal extends Terminal{
                 ((Truck) vehicle).generateDocumentation();
             }
             if(((Truck) vehicle).getActualWeight() > ((Truck) vehicle).getDeclaredWeight()){
+                simulation.getAddMessage().accept("TRUCK CUSTOMS TERMINAL"+terminalId+": Truck has more weight than declared, removing truck: : " + vehicle.getLabel() + " " + vehicle.getVehicleId());
                 try {
                     PrintWriter printWriter = new PrintWriter(new File(Simulation.CUSTOMS_RECORDS_FOLDER+"Truck"+vehicle.getVehicleId()+".txt"));
                     printWriter.println("Truck has more weight than declared, removing truck: " + vehicle);

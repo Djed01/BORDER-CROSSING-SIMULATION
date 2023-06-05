@@ -92,6 +92,7 @@ public class Truck extends Vehicle {
                     }
                 }else if(y==44){
                     synchronized (LOCK) {
+                        simulation.getRemoveQueueVehicle().accept(this);
                         Simulation.MATRIX[y + 1][x] = this;
                         Simulation.MATRIX[y][x] = null;
                         this.y++;
@@ -101,9 +102,11 @@ public class Truck extends Vehicle {
                     }
                 }else {
                     synchronized (LOCK) {
+                        simulation.getRemoveQueueVehicle().accept(this);
                         Simulation.MATRIX[y + 1][x] = this;
                         Simulation.MATRIX[y][x] = null;
                         this.y++;
+                        simulation.getAddQueueVehicle().accept(this);
                         System.out.println("Vehicle " + this.vehicleId + " moved to [" + this.y + "] [" + this.x + "]");
                         LOCK.notifyAll();
                     }

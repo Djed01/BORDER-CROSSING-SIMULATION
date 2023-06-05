@@ -16,4 +16,5 @@ public abstract class Terminal {
         public boolean isInFunction(){
                 return isInFunction;
         }
+
 }

@@ -1,6 +1,7 @@
 package main.java.org.unibl.etf;
 
 import main.java.org.unibl.etf.gui.BorderCrossingFrame;
+import main.java.org.unibl.etf.gui.QueueFrame;
 import main.java.org.unibl.etf.models.passangers.Passenger;
 import main.java.org.unibl.etf.models.terminals.CustomsTerminal;
 import main.java.org.unibl.etf.models.terminals.PoliceTerminal;
@@ -38,6 +39,9 @@ public class Simulation {
     private Consumer<Vehicle> addVehicle;
     private Consumer<Vehicle> removeVehicle;
 
+    private Consumer<Vehicle> addQueueVehicle;
+    private Consumer<Vehicle> removeQueueVehicle;
+
     private Consumer<String> addMessage;
     private final ArrayList<Vehicle> vehicles;
 
@@ -50,7 +54,7 @@ public class Simulation {
 
     public static final int TRUCK_POLICE_TERMINAL_COLUMN = 4;
 
-    private Random random = new Random();
+    private final Random random = new Random();
 
     //Podesavanje loggera
     static {
@@ -72,7 +76,6 @@ public class Simulation {
         vehicles = generateVehicles();
         setVehicles(vehicles);
         setTerminals();
-
 
         // emptySerializationFolder();
     }
@@ -146,11 +149,11 @@ public class Simulation {
     }
 
     private void setTerminals() {
-        MATRIX[POLICE_TERMINAL_ROW][0] = new PoliceTerminal();
-        MATRIX[POLICE_TERMINAL_ROW][2] = new PoliceTerminal();
-        MATRIX[POLICE_TERMINAL_ROW][4] = new TruckPoliceTerminal();
-        MATRIX[CUSTOMS_TERMINAL_ROW][0] = new CustomsTerminal();
-        MATRIX[CUSTOMS_TERMINAL_ROW][4] = new TruckCustomsTerminal();
+        MATRIX[POLICE_TERMINAL_ROW][0] = new PoliceTerminal(1,true);
+        MATRIX[POLICE_TERMINAL_ROW][2] = new PoliceTerminal(2,true);
+        MATRIX[POLICE_TERMINAL_ROW][4] = new TruckPoliceTerminal(3,true);
+        MATRIX[CUSTOMS_TERMINAL_ROW][0] = new CustomsTerminal(1,true);
+        MATRIX[CUSTOMS_TERMINAL_ROW][4] = new TruckCustomsTerminal(2,true);
     }
 
 
@@ -193,6 +196,22 @@ public class Simulation {
 
     public void setRemoveVehicle(Consumer<Vehicle> removeVehicle) {
         this.removeVehicle = removeVehicle;
+    }
+
+    public Consumer<Vehicle> getAddQueueVehicle() {
+        return addQueueVehicle;
+    }
+
+    public void setAddQueueVehicle(Consumer<Vehicle> addQueueVehicle) {
+        this.addQueueVehicle = addQueueVehicle;
+    }
+
+    public Consumer<Vehicle> getRemoveQueueVehicle() {
+        return removeQueueVehicle;
+    }
+
+    public void setRemoveQueueVehicle(Consumer<Vehicle> removeQueueVehicle) {
+        this.removeQueueVehicle = removeQueueVehicle;
     }
 
     public void setAddMessage(Consumer<String> addMessage) {
