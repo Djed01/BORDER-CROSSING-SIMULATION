@@ -1,1 +1,1 @@
-Passenger{name='Cname', surname='Xsurname'} had not allowed stuff.
+Passenger{name='Pname', surname='Xsurname'} had not allowed stuff.

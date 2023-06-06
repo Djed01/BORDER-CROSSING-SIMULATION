@@ -14,23 +14,21 @@ import java.util.logging.Logger;
 import static main.java.org.unibl.etf.Main.simulation;
 
 public class PoliceTerminal extends Terminal{
-    private int terminalId = 0;
     private static final String TERMINAL_NAME = "POLICE TERMINAL ";
     public PoliceTerminal() {
         super();
     }
 
-    public PoliceTerminal(int id, boolean isInFunction) {
+    public PoliceTerminal(String alias, boolean isInFunction) {
         super(isInFunction);
-        this.terminalId = id;
+        this.alias = alias;
     }
 
     public PoliceTerminal(boolean isInFunction) {
         super(isInFunction);
-        terminalId++;
     }
 
-    public synchronized void checkPassengers(Vehicle vehicle) {
+    public void checkPassengers(Vehicle vehicle) {
         int TIME_TO_CHECK_PASSENGER;
         ArrayList<Passenger> passengersToRemove = new ArrayList<>();
         if (vehicle instanceof Bus) {
@@ -40,15 +38,15 @@ public class PoliceTerminal extends Terminal{
         }
        /* System.out.println("Checking passengers in vehicle: " + vehicle);*/
 
-        simulation.getAddMessage().accept(TERMINAL_NAME+terminalId+": Checking passengers in vehicle: " + vehicle.getLabel() + " " + vehicle.getVehicleId());
+        simulation.getAddMessage().accept(TERMINAL_NAME+alias+": Checking passengers in vehicle: " + vehicle.getLabel() + " " + vehicle.getVehicleId());
         for (Passenger passenger : vehicle.getPassengers()) {
             System.out.println("Checking passenger: " + passenger);
             if (!passenger.hasValidIdentificationDocument()) {
                 if (passenger instanceof Driver) {
-                    simulation.getAddMessage().accept(TERMINAL_NAME+terminalId+": Driver doesn't have valid identification document, stopping vehicle: " + vehicle.getLabel() + " " + vehicle.getVehicleId());
+                    simulation.getAddMessage().accept(TERMINAL_NAME+alias+": Driver doesn't have valid identification document, stopping vehicle: " + vehicle.getLabel() + " " + vehicle.getVehicleId());
                     // TODO: stop vehicle
                 } else {
-                    simulation.getAddMessage().accept(TERMINAL_NAME+terminalId+": Passenger doesn't have valid identification document, removing passenger: " + passenger + " from vehicle: " + vehicle.getLabel() + " " + vehicle.getVehicleId());
+                    simulation.getAddMessage().accept(TERMINAL_NAME+alias+": Passenger doesn't have valid identification document, removing passenger: " + passenger + " from vehicle: " + vehicle.getLabel() + " " + vehicle.getVehicleId());
                    // System.out.println("Passenger doesn't have valid identification document, removing passenger: " + passenger);
                     passengersToRemove.add(passenger);
                 }

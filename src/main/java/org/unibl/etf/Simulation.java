@@ -53,6 +53,7 @@ public class Simulation {
     public static final int CUSTOMS_TERMINAL_ROW = 53;
 
     public static final int TRUCK_POLICE_TERMINAL_COLUMN = 4;
+    public boolean isFinished = false;
 
     private final Random random = new Random();
 
@@ -84,6 +85,7 @@ public class Simulation {
         for (Vehicle vehicle : vehicles) {
             vehicle.start();
         }
+        // TODO: How to stop threads?
 
         for (Thread vehicleThread : vehicles) {
             try {
@@ -92,6 +94,7 @@ public class Simulation {
                 e.printStackTrace();
             }
         }
+
     }
 
     private ArrayList<Vehicle> generateVehicles() {
@@ -149,11 +152,11 @@ public class Simulation {
     }
 
     private void setTerminals() {
-        MATRIX[POLICE_TERMINAL_ROW][0] = new PoliceTerminal(1,true);
-        MATRIX[POLICE_TERMINAL_ROW][2] = new PoliceTerminal(2,true);
-        MATRIX[POLICE_TERMINAL_ROW][4] = new TruckPoliceTerminal(3,true);
-        MATRIX[CUSTOMS_TERMINAL_ROW][0] = new CustomsTerminal(1,true);
-        MATRIX[CUSTOMS_TERMINAL_ROW][4] = new TruckCustomsTerminal(2,true);
+        MATRIX[POLICE_TERMINAL_ROW][0] = new PoliceTerminal("P1",true);
+        MATRIX[POLICE_TERMINAL_ROW][2] = new PoliceTerminal("P2",true);
+        MATRIX[POLICE_TERMINAL_ROW][4] = new TruckPoliceTerminal("PK",true);
+        MATRIX[CUSTOMS_TERMINAL_ROW][0] = new CustomsTerminal("C1",true);
+        MATRIX[CUSTOMS_TERMINAL_ROW][4] = new TruckCustomsTerminal("CK",true);
     }
 
 
@@ -245,6 +248,13 @@ public class Simulation {
             } catch (Exception e) {
                 Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, e.fillInStackTrace().toString());
             }
+    }
+
+    public String getVehicleDescription(int i,int j){
+        if(MATRIX[i+45][j] instanceof Vehicle){
+            return ((Vehicle) MATRIX[i+45][j]).toString();
+        }
+        return "";
     }
 
 }

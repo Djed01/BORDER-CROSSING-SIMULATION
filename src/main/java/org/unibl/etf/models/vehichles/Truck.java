@@ -61,10 +61,11 @@ public class Truck extends Vehicle {
 
     @Override
     public String toString() {
-        return "Truck{" + "ID=" + getVehicleId() +
-                " ,needToGenerateDocumentation=" + needToGenerateDocumentation +
-                ", declaredWeight=" + declaredWeight +
-                ", actualWeight=" + actualWeight +
+        return "Truck{" + "ID= " + getVehicleId() +
+                " ,numberOfPassengers= " + numOfPassengers +
+                " ,needToGenerateDocumentation= " + needToGenerateDocumentation +
+                ", declaredWeight= " + declaredWeight +
+                ", actualWeight= " + actualWeight +
                 '}';
     }
 
@@ -73,13 +74,13 @@ public class Truck extends Vehicle {
         while (!isFinished) {
             try {
                 Thread.sleep(100);
-            }catch (InterruptedException e){
+            } catch (InterruptedException e) {
                 Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, e.fillInStackTrace().toString());
             }
 
 
             if (Simulation.MATRIX[y + 1][x] == null && this.y != Simulation.POLICE_TERMINAL_ROW - 2) {
-                if(y>=45) {
+                if (y >= 45) {
                     // Update GUI
                     synchronized (LOCK) {
                         simulation.getRemoveVehicle().accept(this);
@@ -90,7 +91,7 @@ public class Truck extends Vehicle {
                         System.out.println("Vehicle " + this.vehicleId + " moved to [" + this.y + "] [" + this.x + "]");
                         LOCK.notifyAll();
                     }
-                }else if(y==44){
+                } else if (y == 44) {
                     synchronized (LOCK) {
                         simulation.getRemoveQueueVehicle().accept(this);
                         Simulation.MATRIX[y + 1][x] = this;
@@ -100,7 +101,7 @@ public class Truck extends Vehicle {
                         System.out.println("Vehicle " + this.vehicleId + " moved to [" + this.y + "] [" + this.x + "]");
                         LOCK.notifyAll();
                     }
-                }else {
+                } else {
                     synchronized (LOCK) {
                         simulation.getRemoveQueueVehicle().accept(this);
                         Simulation.MATRIX[y + 1][x] = this;
@@ -113,7 +114,8 @@ public class Truck extends Vehicle {
                 }
             } else if (this.y == Simulation.POLICE_TERMINAL_ROW - 2) {
                 if (Simulation.MATRIX[y + 2][Simulation.TRUCK_POLICE_TERMINAL_COLUMN] instanceof TruckPoliceTerminal
-                        && Simulation.MATRIX[y + 1][Simulation.TRUCK_POLICE_TERMINAL_COLUMN] == null) {
+                        && Simulation.MATRIX[y + 1][Simulation.TRUCK_POLICE_TERMINAL_COLUMN] == null &&
+                        ((TruckPoliceTerminal) Simulation.MATRIX[y + 2][Simulation.TRUCK_POLICE_TERMINAL_COLUMN]).isInFunction()) {
                     synchronized (LOCK) {
                         simulation.getRemoveVehicle().accept(this);
                         Simulation.MATRIX[y + 1][Simulation.TRUCK_POLICE_TERMINAL_COLUMN] = this;
@@ -124,38 +126,46 @@ public class Truck extends Vehicle {
                         System.out.println("Vehicle " + this.vehicleId + " moved to [" + this.y + "] [" + this.x + "]");
                         LOCK.notifyAll();
                     }
+                } else {
+                    synchronized (LOCK) {
+                        try {
+                            LOCK.wait();
+                        } catch (InterruptedException e) {
+                            Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, e.fillInStackTrace().toString());
+                        }
+                    }
                 }
             } else if (this.y == Simulation.POLICE_TERMINAL_ROW - 1) {
-                    // Finished checking on police terminal
-                    if (!this.processedAtPolice) {
-                        TruckPoliceTerminal truckPoliceTerminal = (TruckPoliceTerminal) (Simulation.MATRIX[y + 1][Simulation.TRUCK_POLICE_TERMINAL_COLUMN]);
-                        truckPoliceTerminal.checkPassengers(this);
-                        System.out.println("Vehicle " + this.vehicleId + " finished checking at Police terminal");
-                        this.processedAtPolice = true;
-                    }
-                    if (Simulation.MATRIX[y + 2][x] != null) {
-                        synchronized (LOCK) {
-                            try {
-                                LOCK.wait();
-                            } catch (InterruptedException e) {
-                                Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, e.fillInStackTrace().toString());
-                            }
-                        }
-                    } else {
-
-                        synchronized (LOCK) {
-                            simulation.getRemoveVehicle().accept(this);
-                            Simulation.MATRIX[y + 2][x] = this;
-                            Simulation.MATRIX[y][x] = null;
-                            this.y = y + 2;
-                            simulation.getAddVehicle().accept(this);
-                            System.out.println("Vehicle " + this.vehicleId + " moved to [" + this.y + "] [" + this.x + "]");
-                            LOCK.notifyAll();
+                // Finished checking on police terminal
+                if (!this.processedAtPolice) {
+                    TruckPoliceTerminal truckPoliceTerminal = (TruckPoliceTerminal) (Simulation.MATRIX[y + 1][Simulation.TRUCK_POLICE_TERMINAL_COLUMN]);
+                    truckPoliceTerminal.checkPassengers(this);
+                    System.out.println("Vehicle " + this.vehicleId + " finished checking at Police terminal");
+                    this.processedAtPolice = true;
+                }
+                if (Simulation.MATRIX[y + 2][x] != null) {
+                    synchronized (LOCK) {
+                        try {
+                            LOCK.wait();
+                        } catch (InterruptedException e) {
+                            Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, e.fillInStackTrace().toString());
                         }
                     }
-                } else if (this.y == Simulation.CUSTOMS_TERMINAL_ROW - 1) {
+                } else {
 
-                    TruckCustomsTerminal truckCustomsTerminal = (TruckCustomsTerminal) (Simulation.MATRIX[Simulation.CUSTOMS_TERMINAL_ROW][x]);
+                    synchronized (LOCK) {
+                        simulation.getRemoveVehicle().accept(this);
+                        Simulation.MATRIX[y + 2][x] = this;
+                        Simulation.MATRIX[y][x] = null;
+                        this.y = y + 2;
+                        simulation.getAddVehicle().accept(this);
+                        System.out.println("Vehicle " + this.vehicleId + " moved to [" + this.y + "] [" + this.x + "]");
+                        LOCK.notifyAll();
+                    }
+                }
+            } else if (this.y == Simulation.CUSTOMS_TERMINAL_ROW - 1) {
+                TruckCustomsTerminal truckCustomsTerminal = (TruckCustomsTerminal) (Simulation.MATRIX[Simulation.CUSTOMS_TERMINAL_ROW][x]);
+                if (truckCustomsTerminal.isInFunction()) {
                     truckCustomsTerminal.checkPassengers(this);
                     System.out.println("Vehicle " + this.vehicleId + " finished checking at Customs terminal");
 
@@ -179,7 +189,16 @@ public class Truck extends Vehicle {
                         }
                     }
                 }
+            } else {
+                synchronized (LOCK) {
+                    try {
+                        LOCK.wait();
+                    } catch (InterruptedException e) {
+                        Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, e.fillInStackTrace().toString());
+                    }
+                }
             }
         }
     }
+}
 

@@ -4,6 +4,7 @@ import main.java.org.unibl.etf.models.vehichles.Vehicle;
 
 public abstract class Terminal {
         private boolean isInFunction;
+        protected String alias="";
 
         public Terminal(){
                 this.isInFunction = true;

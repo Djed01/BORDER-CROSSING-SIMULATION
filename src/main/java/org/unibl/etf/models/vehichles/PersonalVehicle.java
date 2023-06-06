@@ -10,11 +10,6 @@ public class PersonalVehicle extends Vehicle{
         color = Color.red;
     }
 
-    @Override
-    public String toString() {
-        return "PersonalVehicle{" +
-                "passengers=" + super.getPassengers() +
-                '}';
-    }
+
 
 }
