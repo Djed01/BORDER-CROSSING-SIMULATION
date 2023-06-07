@@ -10,8 +10,19 @@ public class Main {
         simulation = new Simulation();
         BorderCrossingFrame borderCrossingFrame = new BorderCrossingFrame();
         borderCrossingFrame.setVisible(true);
-        simulation.startThreads();
-        simulation.isFinished = true;
-        simulation.serializeVehicles(simulation.getVehiclesToRemove());
+        simulation.setVehicles(simulation.vehicles);
+
+        while(!simulation.isFinished){
+            if(borderCrossingFrame.startStopBtnClicked==1){
+                simulation.joinThreads();
+            }
+            try{
+                Thread.sleep(1000);
+            }catch (InterruptedException e){
+                e.printStackTrace();
+            }
+        }
+//        simulation.isFinished = true;
+//        simulation.serializeVehicles(simulation.getVehiclesToRemove());
     }
 }

@@ -9,6 +9,7 @@ import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.lang.reflect.Field;
@@ -37,6 +38,9 @@ public class BorderCrossingFrame extends JFrame {
 
     private JTextArea vehicleDescription;
 
+    private JButton startStopBtn;
+
+    public int startStopBtnClicked = 0;
 
     public BorderCrossingFrame() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -71,10 +75,7 @@ public class BorderCrossingFrame extends JFrame {
                 matrixLabel[i][j].addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
-                        //vehicleDescriptionLabel.setText("i=" + row + ", j=" + column);
                         vehicleDescription.setText(simulation.getVehicleDescription(row, column));
-                        // Your code here
-                        // This code will be executed when the JLabel is clicked
                     }
                 });
 
@@ -92,8 +93,20 @@ public class BorderCrossingFrame extends JFrame {
         title.setVisible(true);
 
         timerLabel = new JLabel("Timer: 0");
-        timerLabel.setBounds(925, 300, 200, 72);
+        timerLabel.setBounds(920, 300, 200, 72);
         this.getContentPane().add(timerLabel);
+
+        startStopBtn = new JButton("Start");
+        startStopBtn.setBounds(10, 150, 213, 72);
+        startStopBtn.addActionListener(e -> {
+            if (startStopBtnClicked % 2 == 0) {
+                startSimulation();
+            } else {
+                pauseSimulation();
+            }
+            startStopBtnClicked++;
+        });
+        this.getContentPane().add(startStopBtn);
 
         console = new JTextArea();
         JScrollPane scrollPane = new JScrollPane(console);
@@ -106,7 +119,7 @@ public class BorderCrossingFrame extends JFrame {
         queueFrame.setVisible(false);
 
         showQueueButton = new JButton("Show queue");
-        showQueueButton.setBounds(10, 150, 213, 72);
+        showQueueButton.setBounds(10, 250, 213, 72);
         showQueueButton.addActionListener(e -> {
             EventQueue.invokeLater(() -> {
                 try {
@@ -125,8 +138,8 @@ public class BorderCrossingFrame extends JFrame {
         Main.simulation.setRemoveVehicle(removeVehicleConsumer);
         Main.simulation.setAddMessage(addMessageConsumer);
 
-        Thread timer = timer();
-        timer.start();
+//        Thread timer = timer();
+//        timer.start();
     }
 
     //Prikaz automobila na GUI-u
@@ -186,7 +199,7 @@ public class BorderCrossingFrame extends JFrame {
                 if (true) {
                     String time = String.format("%d h %d m %d s", hours, minutes, seconds);
                     //game.setPassedTime(time);
-                    this.timerLabel.setText("<html><div style='text-align: center;'>Vrijeme trajanja igre:<br>" + time + "</div></html>");
+                    this.timerLabel.setText("<html><div style='text-align: center;'>Vrijeme trajanja simulacije:<br>" + time + "</div></html>");
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {
@@ -206,6 +219,24 @@ public class BorderCrossingFrame extends JFrame {
           //  System.out.printf("Game OVER Total time: %d h %d m %d s%n", hours, minutes, seconds);
           //  game.setPassedTime(String.format("%d h %d m %d s", hours, minutes, seconds));
         });
+    }
+
+
+    private void startSimulation() {
+        if (startStopBtnClicked == 0) {
+            //Pokretanje niti
+            Thread simulationDuration = timer();
+            simulationDuration.start();
+            // TODO: LOGIKA ZA POKRETANJE SIMULACIJE
+            simulation.startThreads();
+        }
+        startStopBtn.setText("Zaustavi");
+        simulation.setPause(false);
+    }
+
+    private void pauseSimulation() {
+        startStopBtn.setText("Pokreni");
+        simulation.setPause(true);
     }
 
 }

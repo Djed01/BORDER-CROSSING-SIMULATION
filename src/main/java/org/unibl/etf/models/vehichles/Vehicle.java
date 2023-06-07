@@ -84,18 +84,31 @@ public abstract class Vehicle extends Thread implements Serializable {
         return y;
     }
 
+    public void suspendVehicle(){
+        isSuspended = true;
+    }
+
     @Override
     public void run() {
-        while (!isFinished || !isSuspended) {
+        while (!isFinished && !isSuspended) {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException ex) {
                 Logger.getLogger(Vehicle.class.getName()).log(Level.SEVERE, null, ex);
             }
 
+            //Ukoliko se igra pauzira, pauziramo i kretanje figure
+            synchronized (simulation.PAUSE_LOCK) {
+                try {
+                    if (simulation.isPause())
+                        simulation.PAUSE_LOCK.wait(); //Cekamo dok se igra ne pokrene
+                } catch (InterruptedException e) {
+                    Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, e.fillInStackTrace().toString());
+                }
+            }
+
             if (this.y < Simulation.POLICE_TERMINAL_ROW - 2 && Simulation.MATRIX[y + 1][x] == null) {
                 if (y >= 45) {
-                    // Update GUI
                     synchronized (LOCK) {
                         simulation.getRemoveVehicle().accept(this);
                         Simulation.MATRIX[y + 1][x] = this;
@@ -207,9 +220,7 @@ public abstract class Vehicle extends Thread implements Serializable {
                         LOCK.notifyAll();
                     }
                 }
-            } else if (this.y == 54) {
-                    isFinished = true;
-                } else {
+            } else {
                     synchronized (LOCK) {
                         try {
                             LOCK.wait();

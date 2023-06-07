@@ -40,6 +40,7 @@ public class PoliceTerminal extends Terminal{
 
         simulation.getAddMessage().accept(TERMINAL_NAME+alias+": Checking passengers in vehicle: " + vehicle.getLabel() + " " + vehicle.getVehicleId());
         for (Passenger passenger : vehicle.getPassengers()) {
+            checkIfPause();
             System.out.println("Checking passenger: " + passenger);
             if (!passenger.hasValidIdentificationDocument()) {
                 if (passenger instanceof Driver) {

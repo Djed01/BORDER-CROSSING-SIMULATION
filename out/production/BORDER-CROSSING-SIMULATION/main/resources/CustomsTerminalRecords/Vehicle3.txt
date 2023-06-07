@@ -1,0 +1,1 @@
+Passenger{name='Oname', surname='Tsurname'} had not allowed stuff.

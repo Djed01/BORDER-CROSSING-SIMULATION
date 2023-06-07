@@ -21,11 +21,12 @@ public class TruckCustomsTerminal extends CustomsTerminal {
     public void checkPassengers(Vehicle vehicle) {
         if (vehicle instanceof Truck) {
             TIME_TO_CHECK_PASSENGER = 500;
-
+            checkIfPause();
             if (((Truck) vehicle).isNeedToGenerateDocumentation()) {
                 ((Truck) vehicle).generateDocumentation();
             }
             if (((Truck) vehicle).getActualWeight() > ((Truck) vehicle).getDeclaredWeight()) {
+                checkIfPause();
                 simulation.getAddMessage().accept("TRUCK CUSTOMS TERMINAL" + alias + ": Truck has more weight than declared, removing truck: : " + vehicle.getLabel() + " " + vehicle.getVehicleId());
                 try {
                     PrintWriter printWriter = new PrintWriter(new File(Simulation.CUSTOMS_RECORDS_FOLDER + "Truck" + vehicle.getVehicleId() + ".txt"));

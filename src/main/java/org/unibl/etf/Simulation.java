@@ -17,6 +17,7 @@ import java.sql.Time;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
@@ -31,7 +32,8 @@ public class Simulation {
 
     public static final String CUSTOMS_RECORDS_FOLDER = "src/main/resources/CustomsTerminalRecords/";
 
-
+    public final ReentrantLock PAUSE_LOCK = new ReentrantLock();
+    private volatile boolean pause = false;
     private static final int NUM_OF_BUSES = 5;
     private static final int NUM_OF_TRUCKS = 10;
     private static final int NUM_OF_PERSONAL_VEHICLES = 35;
@@ -43,7 +45,7 @@ public class Simulation {
     private Consumer<Vehicle> removeQueueVehicle;
 
     private Consumer<String> addMessage;
-    private final ArrayList<Vehicle> vehicles;
+    public final ArrayList<Vehicle> vehicles;
 
     private HashMap<Vehicle,ArrayList<Passenger>> vehiclesToRemove;
     private HashMap<Vehicle,ArrayList<Passenger>> trucksToRemove;
@@ -75,7 +77,7 @@ public class Simulation {
 //        Properties properties = loadProperties();
 //        boolean terminalOpen = Boolean.parseBoolean(properties.getProperty("policeTerminalIsInFunction1"));
         vehicles = generateVehicles();
-        setVehicles(vehicles);
+ //       setVehicles(vehicles);
         setTerminals();
 
         // emptySerializationFolder();
@@ -85,8 +87,9 @@ public class Simulation {
         for (Vehicle vehicle : vehicles) {
             vehicle.start();
         }
-        // TODO: How to stop threads?
+    }
 
+    public void joinThreads(){
         for (Thread vehicleThread : vehicles) {
             try {
                 vehicleThread.join();
@@ -94,7 +97,12 @@ public class Simulation {
                 e.printStackTrace();
             }
         }
+        isFinished = true;
+    }
 
+    public void removeVehicle(Vehicle vehicle){
+       // getRemoveVehicle().accept(vehicle);
+        MATRIX[vehicle.getY()][vehicle.getX()] = null;
     }
 
     private ArrayList<Vehicle> generateVehicles() {
@@ -140,12 +148,17 @@ public class Simulation {
         return properties;
     }
 
-    private void setVehicles(ArrayList<Vehicle> vehicles) {
+    public void setVehicles(ArrayList<Vehicle> vehicles) {
         int i = 0;
         for (Vehicle vehicle : vehicles) {
             if (MATRIX[i][2] == null) {
                 vehicle.setXY(2, i);
                 MATRIX[i][2] = vehicle;
+                if(i>=45) {
+                    getAddVehicle().accept(vehicle);
+                }else{
+                    getAddQueueVehicle().accept(vehicle);
+                }
                 i++;
             }
         }
@@ -256,5 +269,20 @@ public class Simulation {
         }
         return "";
     }
+
+    public boolean isPause() {
+        return pause;
+    }
+
+    public void setPause(boolean state) {
+        synchronized (PAUSE_LOCK) {
+            if (!state)
+                PAUSE_LOCK.notifyAll(); //Obavjestavanje svih niti
+        }
+        this.pause = state;
+    }
+
+
+
 
 }

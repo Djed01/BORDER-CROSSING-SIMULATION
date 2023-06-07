@@ -38,6 +38,7 @@ public class CustomsTerminal extends Terminal{
         if(vehicle instanceof Bus){
             TIME_TO_CHECK_PASSENGER = 100;
             for(Passenger passenger: vehicle.getPassengers()){
+                checkIfPause();
                 System.out.println("Checking passenger: " + passenger);
                 if(passenger.hasSuitcase()){
                     if(passenger.getSuitcase().hasNotAllowedStuff()){

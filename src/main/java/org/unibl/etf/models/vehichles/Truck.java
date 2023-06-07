@@ -189,7 +189,7 @@ public class Truck extends Vehicle {
                         }
                     }
                 }
-            } else {
+            }else {
                 synchronized (LOCK) {
                     try {
                         LOCK.wait();
