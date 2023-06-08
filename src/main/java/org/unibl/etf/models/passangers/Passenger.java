@@ -30,8 +30,8 @@ public class Passenger implements Serializable {
         return suitcase != null;
     }
 
-    public boolean hasValidIdentificationDocument(){
-        return identificationDocument.isValid();
+    public boolean hasNotValidIdentificationDocument(){
+        return identificationDocument.isNotValid();
     }
 
     public String getName(){

@@ -33,8 +33,10 @@ public class BorderCrossingFrame extends JFrame {
     private JLabel[][] matrixLabel;
 
     private JButton showQueueButton;
+    private JButton showSuspendedButton;
 
     private QueueFrame queueFrame;
+    private SuspendedVehiclesFrame suspendedVehiclesFrame;
 
     private JTextArea vehicleDescription;
 
@@ -131,6 +133,22 @@ public class BorderCrossingFrame extends JFrame {
         });
         getContentPane().add(showQueueButton);
 
+        suspendedVehiclesFrame = new SuspendedVehiclesFrame();
+        suspendedVehiclesFrame.setVisible(false);
+
+        showSuspendedButton = new JButton("Show suspended vehicles");
+        showSuspendedButton.setBounds(10, 350, 213, 72);
+        showSuspendedButton.addActionListener(e -> {
+            EventQueue.invokeLater(() -> {
+                try {
+                    suspendedVehiclesFrame.setVisible(true);
+                } catch (Exception ex) {
+                    Logger.getLogger(BorderCrossingFrame.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            });
+        });
+        getContentPane().add(showSuspendedButton);
+
         repaint();
 
 
@@ -196,9 +214,8 @@ public class BorderCrossingFrame extends JFrame {
         return new Thread(() -> {
             int hours = 0, minutes = 0, seconds = 0;
             while (!simulation.isFinished) {
-                if (true) {
+                if (!simulation.isPause()) {
                     String time = String.format("%d h %d m %d s", hours, minutes, seconds);
-                    //game.setPassedTime(time);
                     this.timerLabel.setText("<html><div style='text-align: center;'>Vrijeme trajanja simulacije:<br>" + time + "</div></html>");
                     try {
                         Thread.sleep(1000);
@@ -216,8 +233,7 @@ public class BorderCrossingFrame extends JFrame {
                     }
                 }
             }
-          //  System.out.printf("Game OVER Total time: %d h %d m %d s%n", hours, minutes, seconds);
-          //  game.setPassedTime(String.format("%d h %d m %d s", hours, minutes, seconds));
+          startStopBtn.setEnabled(false);
         });
     }
 

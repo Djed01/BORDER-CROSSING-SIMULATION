@@ -28,6 +28,7 @@ public class TruckCustomsTerminal extends CustomsTerminal {
             if (((Truck) vehicle).getActualWeight() > ((Truck) vehicle).getDeclaredWeight()) {
                 checkIfPause();
                 simulation.getAddMessage().accept("TRUCK CUSTOMS TERMINAL" + alias + ": Truck has more weight than declared, removing truck: : " + vehicle.getLabel() + " " + vehicle.getVehicleId());
+                vehicle.suspendVehicle();
                 try {
                     PrintWriter printWriter = new PrintWriter(new File(Simulation.CUSTOMS_RECORDS_FOLDER + "Truck" + vehicle.getVehicleId() + ".txt"));
                     printWriter.println(alias+": Truck has more weight than declared, removing truck: " + vehicle);
@@ -35,7 +36,6 @@ public class TruckCustomsTerminal extends CustomsTerminal {
                 } catch (FileNotFoundException e) {
                     Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, e.fillInStackTrace().toString());
                 }
-                // TODO: Remove truck but how?
             }
             try {
                 Thread.sleep(TIME_TO_CHECK_PASSENGER);

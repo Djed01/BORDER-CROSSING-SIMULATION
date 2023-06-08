@@ -1,21 +1,16 @@
 package main.java.org.unibl.etf;
 
-import main.java.org.unibl.etf.gui.BorderCrossingFrame;
-import main.java.org.unibl.etf.gui.QueueFrame;
+
 import main.java.org.unibl.etf.models.passangers.Passenger;
-import main.java.org.unibl.etf.models.terminals.CustomsTerminal;
-import main.java.org.unibl.etf.models.terminals.PoliceTerminal;
-import main.java.org.unibl.etf.models.terminals.TruckCustomsTerminal;
-import main.java.org.unibl.etf.models.terminals.TruckPoliceTerminal;
+import main.java.org.unibl.etf.models.terminals.*;
 import main.java.org.unibl.etf.models.vehichles.Bus;
 import main.java.org.unibl.etf.models.vehichles.PersonalVehicle;
 import main.java.org.unibl.etf.models.vehichles.Truck;
 import main.java.org.unibl.etf.models.vehichles.Vehicle;
+import main.java.org.unibl.etf.models.watcher.PropertyChecker;
 
 import java.io.*;
-import java.sql.Time;
 import java.text.DecimalFormat;
-import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
@@ -26,13 +21,15 @@ import java.util.logging.Logger;
 
 public class Simulation {
     private static final String LOGGER_PATH = "src/main/resources/logs/Simulation.log";
-    private static final String CONFIG_PATH = "src/main/resources/config.properties";
+    public static final String CONFIG_PATH = "src/main/resources/config";
 
     public static final String SERIALIZATION_FOLDER = "src/main/resources/PoliceTerminalRecords/";
 
     public static final String CUSTOMS_RECORDS_FOLDER = "src/main/resources/CustomsTerminalRecords/";
 
     public final ReentrantLock PAUSE_LOCK = new ReentrantLock();
+
+    private ArrayList<Terminal> terminals = new ArrayList<>();
     private volatile boolean pause = false;
     private static final int NUM_OF_BUSES = 5;
     private static final int NUM_OF_TRUCKS = 10;
@@ -56,7 +53,6 @@ public class Simulation {
 
     public static final int TRUCK_POLICE_TERMINAL_COLUMN = 4;
     public boolean isFinished = false;
-
     private final Random random = new Random();
 
     //Podesavanje loggera
@@ -79,7 +75,6 @@ public class Simulation {
         vehicles = generateVehicles();
  //       setVehicles(vehicles);
         setTerminals();
-
         // emptySerializationFolder();
     }
 
@@ -101,8 +96,8 @@ public class Simulation {
     }
 
     public void removeVehicle(Vehicle vehicle){
-       // getRemoveVehicle().accept(vehicle);
-        MATRIX[vehicle.getY()][vehicle.getX()] = null;
+            getRemoveVehicle().accept(vehicle);
+            MATRIX[vehicle.getY()][vehicle.getX()] = null;
     }
 
     private ArrayList<Vehicle> generateVehicles() {
@@ -136,7 +131,7 @@ public class Simulation {
         }
     }
 
-    private Properties loadProperties() {
+    public Properties loadProperties() {
         Properties properties = new Properties();
         FileInputStream fip;
         try {
@@ -165,13 +160,34 @@ public class Simulation {
     }
 
     private void setTerminals() {
-        MATRIX[POLICE_TERMINAL_ROW][0] = new PoliceTerminal("P1",true);
-        MATRIX[POLICE_TERMINAL_ROW][2] = new PoliceTerminal("P2",true);
-        MATRIX[POLICE_TERMINAL_ROW][4] = new TruckPoliceTerminal("PK",true);
-        MATRIX[CUSTOMS_TERMINAL_ROW][0] = new CustomsTerminal("C1",true);
-        MATRIX[CUSTOMS_TERMINAL_ROW][4] = new TruckCustomsTerminal("CK",true);
+        PoliceTerminal P1 = new PoliceTerminal("P1",true);
+        terminals.add(P1);
+        MATRIX[POLICE_TERMINAL_ROW][0] = P1;
+        PoliceTerminal P2 = new PoliceTerminal("P2",true);
+        terminals.add(P2);
+        MATRIX[POLICE_TERMINAL_ROW][2] = P2;
+        TruckPoliceTerminal PK = new TruckPoliceTerminal("PK",true);
+        terminals.add(PK);
+        MATRIX[POLICE_TERMINAL_ROW][4] = PK;
+        CustomsTerminal C1 = new CustomsTerminal("C1",true);
+        terminals.add(C1);
+        MATRIX[CUSTOMS_TERMINAL_ROW][0] = C1;
+        TruckCustomsTerminal CK = new TruckCustomsTerminal("CK",true);
+        terminals.add(CK);
+        MATRIX[CUSTOMS_TERMINAL_ROW][4] = CK;
     }
 
+    public void setFunctionOfTerminals(boolean[] config)
+    {
+        int i=0;
+        for(Terminal terminal:terminals){
+            terminal.setInFunction(config[i]);
+            i++;
+        }
+        synchronized (Vehicle.LOCK){
+            Vehicle.LOCK.notifyAll();
+        }
+    }
 
     public static void deleteFiles(File folder) {
         File[] files = folder.listFiles();

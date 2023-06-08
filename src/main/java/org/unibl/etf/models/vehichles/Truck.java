@@ -71,7 +71,7 @@ public class Truck extends Vehicle {
 
     @Override
     public void run() {
-        while (!isFinished) {
+        while (!isFinished && !isSuspended) {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
@@ -143,24 +143,26 @@ public class Truck extends Vehicle {
                     System.out.println("Vehicle " + this.vehicleId + " finished checking at Police terminal");
                     this.processedAtPolice = true;
                 }
-                if (Simulation.MATRIX[y + 2][x] != null) {
-                    synchronized (LOCK) {
-                        try {
-                            LOCK.wait();
-                        } catch (InterruptedException e) {
-                            Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, e.fillInStackTrace().toString());
+                if(!isSuspended) {
+                    if (Simulation.MATRIX[y + 2][x] != null) {
+                        synchronized (LOCK) {
+                            try {
+                                LOCK.wait();
+                            } catch (InterruptedException e) {
+                                Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, e.fillInStackTrace().toString());
+                            }
                         }
-                    }
-                } else {
+                    } else {
 
-                    synchronized (LOCK) {
-                        simulation.getRemoveVehicle().accept(this);
-                        Simulation.MATRIX[y + 2][x] = this;
-                        Simulation.MATRIX[y][x] = null;
-                        this.y = y + 2;
-                        simulation.getAddVehicle().accept(this);
-                        System.out.println("Vehicle " + this.vehicleId + " moved to [" + this.y + "] [" + this.x + "]");
-                        LOCK.notifyAll();
+                        synchronized (LOCK) {
+                            simulation.getRemoveVehicle().accept(this);
+                            Simulation.MATRIX[y + 2][x] = this;
+                            Simulation.MATRIX[y][x] = null;
+                            this.y = y + 2;
+                            simulation.getAddVehicle().accept(this);
+                            System.out.println("Vehicle " + this.vehicleId + " moved to [" + this.y + "] [" + this.x + "]");
+                            LOCK.notifyAll();
+                        }
                     }
                 }
             } else if (this.y == Simulation.CUSTOMS_TERMINAL_ROW - 1) {
@@ -168,24 +170,25 @@ public class Truck extends Vehicle {
                 if (truckCustomsTerminal.isInFunction()) {
                     truckCustomsTerminal.checkPassengers(this);
                     System.out.println("Vehicle " + this.vehicleId + " finished checking at Customs terminal");
-
-                    synchronized (LOCK) {
-                        // Finished checking on customs terminal
-                        simulation.getRemoveVehicle().accept(this);
-                        Simulation.MATRIX[y + 2][x] = this;
-                        Simulation.MATRIX[y][x] = null;
-                        this.y = y + 2;
-                        simulation.getAddVehicle().accept(this);
-                        System.out.println("Vehicle " + this.vehicleId + " CROSSING BORDER");
-                        isFinished = true;
-                        LOCK.notifyAll();
-                    }
-                } else {
-                    synchronized (LOCK) {
-                        try {
-                            LOCK.wait();
-                        } catch (InterruptedException e) {
-                            Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, e.fillInStackTrace().toString());
+                    if (!isSuspended) {
+                        synchronized (LOCK) {
+                            // Finished checking on customs terminal
+                            simulation.getRemoveVehicle().accept(this);
+                            Simulation.MATRIX[y + 2][x] = this;
+                            Simulation.MATRIX[y][x] = null;
+                            this.y = y + 2;
+                            simulation.getAddVehicle().accept(this);
+                            System.out.println("Vehicle " + this.vehicleId + " CROSSING BORDER");
+                            isFinished = true;
+                            LOCK.notifyAll();
+                        }
+                    } else {
+                        synchronized (LOCK) {
+                            try {
+                                LOCK.wait();
+                            } catch (InterruptedException e) {
+                                Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, e.fillInStackTrace().toString());
+                            }
                         }
                     }
                 }
@@ -196,6 +199,13 @@ public class Truck extends Vehicle {
                     } catch (InterruptedException e) {
                         Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, e.fillInStackTrace().toString());
                     }
+                }
+            }
+
+            if(this.isSuspended){
+                synchronized (LOCK) {
+                    simulation.removeVehicle(this);
+                    LOCK.notifyAll();
                 }
             }
         }

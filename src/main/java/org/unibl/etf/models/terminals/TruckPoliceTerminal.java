@@ -7,8 +7,4 @@ public class TruckPoliceTerminal extends PoliceTerminal{
         super(alias, isInFunction);
     }
 
-    @Override
-    public void checkPassengers(Vehicle vehicle) {
-        super.checkPassengers(vehicle);
-    }
 }

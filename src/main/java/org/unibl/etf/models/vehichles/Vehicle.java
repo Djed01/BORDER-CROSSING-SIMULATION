@@ -181,24 +181,26 @@ public abstract class Vehicle extends Thread implements Serializable {
                     System.out.println("Vehicle " + this.vehicleId + " finished checking at Police terminal");
                     this.processedAtPolice = true;
                 }
-                if (Simulation.MATRIX[y + 2][0] != null) {
-                    synchronized (LOCK) {
-                        try {
-                            LOCK.wait();
-                        } catch (InterruptedException e) {
-                            Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, e.fillInStackTrace().toString());
+                if(!this.isSuspended) {
+                    if (Simulation.MATRIX[y + 2][0] != null) {
+                        synchronized (LOCK) {
+                            try {
+                                LOCK.wait();
+                            } catch (InterruptedException e) {
+                                Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, e.fillInStackTrace().toString());
+                            }
                         }
-                    }
-                } else {
-                    synchronized (LOCK) {
-                        simulation.getRemoveVehicle().accept(this);
-                        Simulation.MATRIX[y + 2][0] = this;
-                        Simulation.MATRIX[y][x] = null;
-                        this.y = y + 2;
-                        this.x = 0;
-                        simulation.getAddVehicle().accept(this);
-                        System.out.println("Vehicle " + this.vehicleId + " moved to [" + this.y + "] [" + this.x + "]");
-                        LOCK.notifyAll();
+                    } else {
+                        synchronized (LOCK) {
+                            simulation.getRemoveVehicle().accept(this);
+                            Simulation.MATRIX[y + 2][0] = this;
+                            Simulation.MATRIX[y][x] = null;
+                            this.y = y + 2;
+                            this.x = 0;
+                            simulation.getAddVehicle().accept(this);
+                            System.out.println("Vehicle " + this.vehicleId + " moved to [" + this.y + "] [" + this.x + "]");
+                            LOCK.notifyAll();
+                        }
                     }
                 }
             } else if (this.y == Simulation.CUSTOMS_TERMINAL_ROW - 1) {
@@ -208,16 +210,18 @@ public abstract class Vehicle extends Thread implements Serializable {
                     customsTerminal.checkPassengers(this);
                     System.out.println("Vehicle " + this.vehicleId + " finished checking at Customs terminal");
 
-                    // Finished checking on customs terminal
-                    synchronized (LOCK) {
-                        simulation.getRemoveVehicle().accept(this);
-                        Simulation.MATRIX[y + 2][x] = this;
-                        Simulation.MATRIX[y][x] = null;
-                        this.y = y + 2;
-                        simulation.getAddVehicle().accept(this);
-                        System.out.println("Vehicle " + this.vehicleId + " CROSSING BORDER");
-                        isFinished = true;
-                        LOCK.notifyAll();
+                    if (!this.isSuspended) {
+                        // Finished checking on customs terminal
+                        synchronized (LOCK) {
+                            simulation.getRemoveVehicle().accept(this);
+                            Simulation.MATRIX[y + 2][x] = this;
+                            Simulation.MATRIX[y][x] = null;
+                            this.y = y + 2;
+                            simulation.getAddVehicle().accept(this);
+                            System.out.println("Vehicle " + this.vehicleId + " CROSSING BORDER");
+                            isFinished = true;
+                            LOCK.notifyAll();
+                        }
                     }
                 }
             } else {
@@ -229,6 +233,13 @@ public abstract class Vehicle extends Thread implements Serializable {
                         }
                     }
                 }
+
+            if(this.isSuspended){
+                synchronized (LOCK) {
+                    simulation.removeVehicle(this);
+                    LOCK.notifyAll();
+                }
+            }
 
         }
     }

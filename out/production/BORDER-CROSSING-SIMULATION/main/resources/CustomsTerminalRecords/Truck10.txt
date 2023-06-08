@@ -1,1 +1,1 @@
-CK: Truck has more weight than declared, removing truck: Truck{ID= 10 ,numberOfPassengers= 2 ,needToGenerateDocumentation= true, declaredWeight= 3264.21, actualWeight= 3617.88}
+CK: Truck has more weight than declared, removing truck: Truck{ID= 10 ,numberOfPassengers= 2 ,needToGenerateDocumentation= true, declaredWeight= 8513.09, actualWeight= 10466.91}

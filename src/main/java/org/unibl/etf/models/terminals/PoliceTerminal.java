@@ -36,19 +36,19 @@ public class PoliceTerminal extends Terminal{
         } else {
             TIME_TO_CHECK_PASSENGER = 500;
         }
-       /* System.out.println("Checking passengers in vehicle: " + vehicle);*/
 
         simulation.getAddMessage().accept(TERMINAL_NAME+alias+": Checking passengers in vehicle: " + vehicle.getLabel() + " " + vehicle.getVehicleId());
         for (Passenger passenger : vehicle.getPassengers()) {
             checkIfPause();
-            System.out.println("Checking passenger: " + passenger);
-            if (!passenger.hasValidIdentificationDocument()) {
+
+            if (passenger.hasNotValidIdentificationDocument()) {
                 if (passenger instanceof Driver) {
                     simulation.getAddMessage().accept(TERMINAL_NAME+alias+": Driver doesn't have valid identification document, stopping vehicle: " + vehicle.getLabel() + " " + vehicle.getVehicleId());
+                    passengersToRemove.add(passenger);
+                    vehicle.suspendVehicle();
                     // TODO: stop vehicle
                 } else {
                     simulation.getAddMessage().accept(TERMINAL_NAME+alias+": Passenger doesn't have valid identification document, removing passenger: " + passenger + " from vehicle: " + vehicle.getLabel() + " " + vehicle.getVehicleId());
-                   // System.out.println("Passenger doesn't have valid identification document, removing passenger: " + passenger);
                     passengersToRemove.add(passenger);
                 }
             }

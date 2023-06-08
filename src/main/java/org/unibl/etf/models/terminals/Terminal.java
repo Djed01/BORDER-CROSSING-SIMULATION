@@ -24,6 +24,10 @@ public abstract class Terminal {
                 return isInFunction;
         }
 
+        public void setInFunction(boolean config){
+                isInFunction = config;
+        }
+
         protected void checkIfPause(){
                 //Ukoliko se igra pauzira, pauziramo i kretanje figure
                 synchronized (simulation.PAUSE_LOCK) {
