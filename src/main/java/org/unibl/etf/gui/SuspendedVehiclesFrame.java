@@ -11,6 +11,7 @@ import java.util.HashMap;
 import static main.java.org.unibl.etf.Main.simulation;
 
 public class SuspendedVehiclesFrame extends JFrame {
+    private   Thread mapReader;
     private JPanel contentPane;
     private JLabel[][] matrixLabel;
 
@@ -45,6 +46,13 @@ public class SuspendedVehiclesFrame extends JFrame {
                 centralPanel.add(matrixLabel[i][j]);
             }
         this.getContentPane().add(centralPanel);
+
+        mapReader = mapReader();
+
+    }
+
+    public void startReading(){
+        mapReader.start();
     }
 
     public void showVehicles(HashMap<Vehicle,String> vehicleMap){
@@ -63,11 +71,26 @@ public class SuspendedVehiclesFrame extends JFrame {
                 labelUp.setOpaque(true);
                 labelUp.setBackground(vehicle.getColor());
                 j++;
-                if(j%5==0){
+                if(j%10==0){
                     j=0;
                     i++;
                 }
             }
         }
     }
+
+
+    private Thread mapReader() {
+        //Mjerenje vremena na nacin da nit postavimo u sleep mode jednu sekundu te nakon toga povecavamo brojace
+        return new Thread(() -> {
+            while (true) {
+                try {
+                    Thread.sleep(1000);
+                    showVehicles(simulation.getSerializedVehicles());
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        }
 }

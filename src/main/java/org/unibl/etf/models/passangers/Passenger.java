@@ -48,6 +48,7 @@ public class Passenger implements Serializable {
         return "Passenger{" +
                 "name='" + name + '\'' +
                 ", surname='" + surname + '\''+
+                ", suitcase='" + suitcase + '\''+
                 '}';
     }
 

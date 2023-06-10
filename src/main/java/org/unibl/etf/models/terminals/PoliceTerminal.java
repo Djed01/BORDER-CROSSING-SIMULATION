@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 import static main.java.org.unibl.etf.Main.simulation;
 
 public class PoliceTerminal extends Terminal{
-    private static final String TERMINAL_NAME = "POLICE TERMINAL ";
+    private static String TERMINAL_NAME = "POLICE TERMINAL ";
     public PoliceTerminal() {
         super();
     }
@@ -29,6 +29,7 @@ public class PoliceTerminal extends Terminal{
     }
 
     public void checkPassengers(Vehicle vehicle) {
+        StringBuilder description = new StringBuilder();
         int TIME_TO_CHECK_PASSENGER;
         ArrayList<Passenger> passengersToRemove = new ArrayList<>();
         if (vehicle instanceof Bus) {
@@ -38,16 +39,19 @@ public class PoliceTerminal extends Terminal{
         }
 
         simulation.getAddMessage().accept(TERMINAL_NAME+alias+": Checking passengers in vehicle: " + vehicle.getLabel() + " " + vehicle.getVehicleId());
+        description.append(vehicle.getLabel()).append(" ").append(vehicle.getVehicleId()).append(":\n\n");
         for (Passenger passenger : vehicle.getPassengers()) {
             checkIfPause();
 
             if (passenger.hasNotValidIdentificationDocument()) {
                 if (passenger instanceof Driver) {
+                    description.append(TERMINAL_NAME).append(alias).append(": Driver didn't had valid identification document, vehicle suspended from broder!\n\n");
                     simulation.getAddMessage().accept(TERMINAL_NAME+alias+": Driver doesn't have valid identification document, stopping vehicle: " + vehicle.getLabel() + " " + vehicle.getVehicleId());
                     passengersToRemove.add(passenger);
                     vehicle.suspendVehicle();
                     // TODO: stop vehicle
                 } else {
+                    description.append(TERMINAL_NAME).append(alias).append(": ").append(passenger.toString()).append(" didn't had valid identification document and removed from vehicle!\n\n");
                     simulation.getAddMessage().accept(TERMINAL_NAME+alias+": Passenger doesn't have valid identification document, removing passenger: " + passenger + " from vehicle: " + vehicle.getLabel() + " " + vehicle.getVehicleId());
                     passengersToRemove.add(passenger);
                 }
@@ -62,11 +66,12 @@ public class PoliceTerminal extends Terminal{
         if (passengersToRemove.size() > 0) {
             for (Passenger passenger : passengersToRemove) {
                 vehicle.getPassengers().remove(passenger);
+                vehicle.decrementNumOfPassengers();
             }
         }
 
         if (passengersToRemove.size() > 0) {
-            simulation.addVehicleToRemove(vehicle, passengersToRemove);
+            simulation.addVehicleToRemove(vehicle, description.toString());
         }
 
     }

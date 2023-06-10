@@ -1,4 +1,0 @@
-Passenger{name='Lname', surname='Fsurname'} had not allowed stuff.
-Passenger{name='Qname', surname='Hsurname'} had not allowed stuff.
-Passenger{name='Wname', surname='Csurname'} had not allowed stuff.
-Passenger{name='Gname', surname='Dsurname'} had not allowed stuff.

@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 import static main.java.org.unibl.etf.Main.simulation;
 
 public class Truck extends Vehicle {
+    private static int numOfTrucks = 0;
     public static final int PROBABILITY_OF_DOCUMENT_GENERATION = 50;
     public static final int PROBABILITY_OF_OVERLOADING = 20;
 
@@ -35,20 +36,21 @@ public class Truck extends Vehicle {
             this.needToGenerateDocumentation = false;
         }
 
-        if (Simulation.generateBool(PROBABILITY_OF_OVERLOADING)) {
+        if (numOfTrucks<0.2* Simulation.NUM_OF_TRUCKS) {
             this.actualWeight = Double.parseDouble(df.format(declaredWeight + random.nextDouble(declaredWeight * 0.3)));
         } else {
             this.actualWeight = Double.parseDouble(df.format(random.nextDouble(declaredWeight)));
         }
-
+        numOfTrucks++;
     }
 
     public boolean isNeedToGenerateDocumentation() {
         return needToGenerateDocumentation;
     }
 
-    public void generateDocumentation() {
-        System.out.println("Documentation generated");
+    public void generateDocumentation()
+    {
+//        System.out.println("Documentation generated");
     }
 
     public double getDeclaredWeight() {
@@ -88,7 +90,7 @@ public class Truck extends Vehicle {
                         Simulation.MATRIX[y][x] = null;
                         this.y++;
                         simulation.getAddVehicle().accept(this);
-                        System.out.println("Vehicle " + this.vehicleId + " moved to [" + this.y + "] [" + this.x + "]");
+//                        System.out.println("Vehicle " + this.vehicleId + " moved to [" + this.y + "] [" + this.x + "]");
                         LOCK.notifyAll();
                     }
                 } else if (y == 44) {
@@ -98,7 +100,7 @@ public class Truck extends Vehicle {
                         Simulation.MATRIX[y][x] = null;
                         this.y++;
                         simulation.getAddVehicle().accept(this);
-                        System.out.println("Vehicle " + this.vehicleId + " moved to [" + this.y + "] [" + this.x + "]");
+//                        System.out.println("Vehicle " + this.vehicleId + " moved to [" + this.y + "] [" + this.x + "]");
                         LOCK.notifyAll();
                     }
                 } else {
@@ -108,7 +110,7 @@ public class Truck extends Vehicle {
                         Simulation.MATRIX[y][x] = null;
                         this.y++;
                         simulation.getAddQueueVehicle().accept(this);
-                        System.out.println("Vehicle " + this.vehicleId + " moved to [" + this.y + "] [" + this.x + "]");
+//                        System.out.println("Vehicle " + this.vehicleId + " moved to [" + this.y + "] [" + this.x + "]");
                         LOCK.notifyAll();
                     }
                 }
@@ -123,7 +125,7 @@ public class Truck extends Vehicle {
                         this.x = Simulation.TRUCK_POLICE_TERMINAL_COLUMN;
                         this.y++;
                         simulation.getAddVehicle().accept(this);
-                        System.out.println("Vehicle " + this.vehicleId + " moved to [" + this.y + "] [" + this.x + "]");
+//                        System.out.println("Vehicle " + this.vehicleId + " moved to [" + this.y + "] [" + this.x + "]");
                         LOCK.notifyAll();
                     }
                 } else {
@@ -140,7 +142,7 @@ public class Truck extends Vehicle {
                 if (!this.processedAtPolice) {
                     TruckPoliceTerminal truckPoliceTerminal = (TruckPoliceTerminal) (Simulation.MATRIX[y + 1][Simulation.TRUCK_POLICE_TERMINAL_COLUMN]);
                     truckPoliceTerminal.checkPassengers(this);
-                    System.out.println("Vehicle " + this.vehicleId + " finished checking at Police terminal");
+//                    System.out.println("Vehicle " + this.vehicleId + " finished checking at Police terminal");
                     this.processedAtPolice = true;
                 }
                 if(!isSuspended) {
@@ -160,7 +162,7 @@ public class Truck extends Vehicle {
                             Simulation.MATRIX[y][x] = null;
                             this.y = y + 2;
                             simulation.getAddVehicle().accept(this);
-                            System.out.println("Vehicle " + this.vehicleId + " moved to [" + this.y + "] [" + this.x + "]");
+//                            System.out.println("Vehicle " + this.vehicleId + " moved to [" + this.y + "] [" + this.x + "]");
                             LOCK.notifyAll();
                         }
                     }
@@ -169,7 +171,7 @@ public class Truck extends Vehicle {
                 TruckCustomsTerminal truckCustomsTerminal = (TruckCustomsTerminal) (Simulation.MATRIX[Simulation.CUSTOMS_TERMINAL_ROW][x]);
                 if (truckCustomsTerminal.isInFunction()) {
                     truckCustomsTerminal.checkPassengers(this);
-                    System.out.println("Vehicle " + this.vehicleId + " finished checking at Customs terminal");
+//                    System.out.println("Vehicle " + this.vehicleId + " finished checking at Customs terminal");
                     if (!isSuspended) {
                         synchronized (LOCK) {
                             // Finished checking on customs terminal
@@ -178,7 +180,7 @@ public class Truck extends Vehicle {
                             Simulation.MATRIX[y][x] = null;
                             this.y = y + 2;
                             simulation.getAddVehicle().accept(this);
-                            System.out.println("Vehicle " + this.vehicleId + " CROSSING BORDER");
+//                            System.out.println("Vehicle " + this.vehicleId + " CROSSING BORDER");
                             isFinished = true;
                             LOCK.notifyAll();
                         }

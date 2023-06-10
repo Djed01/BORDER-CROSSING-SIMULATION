@@ -1,0 +1,27 @@
+
+CUSTOMS TERMINAL C1 RECORDS FOR VEHICLE B 5:
+
+Passenger{name='Sname', surname='Ysurname'} had not allowed stuff.
+Passenger{name='Uname', surname='Vsurname'} had not allowed stuff.
+Passenger{name='Bname', surname='Psurname'} had not allowed stuff.
+
+CUSTOMS TERMINAL C1 RECORDS FOR VEHICLE B 4:
+
+Passenger{name='Tname', surname='Esurname'} had not allowed stuff.
+
+CUSTOMS TERMINAL C1 RECORDS FOR VEHICLE B 2:
+
+Passenger{name='Aname', surname='Hsurname'} had not allowed stuff.
+Passenger{name='Ename', surname='Tsurname'} had not allowed stuff.
+Passenger{name='Zname', surname='Psurname'} had not allowed stuff.
+Passenger{name='Kname', surname='Osurname'} had not allowed stuff.
+Passenger{name='Fname', surname='Rsurname'} had not allowed stuff.
+Passenger{name='Oname', surname='Hsurname'} had not allowed stuff.
+Passenger{name='Iname', surname='Gsurname'} had not allowed stuff.
+Passenger{name='Dname', surname='Zsurname'} had not allowed stuff.
+
+CUSTOMS TERMINAL C1 RECORDS FOR VEHICLE B 1:
+
+Passenger{name='Aname', surname='Tsurname'} had not allowed stuff.
+Passenger{name='Lname', surname='Nsurname'} had not allowed stuff.
+Passenger{name='Yname', surname='Ksurname'} had not allowed stuff.

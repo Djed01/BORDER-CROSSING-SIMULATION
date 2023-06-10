@@ -156,8 +156,7 @@ public class BorderCrossingFrame extends JFrame {
         Main.simulation.setRemoveVehicle(removeVehicleConsumer);
         Main.simulation.setAddMessage(addMessageConsumer);
 
-//        Thread timer = timer();
-//        timer.start();
+
     }
 
     //Prikaz automobila na GUI-u
@@ -245,6 +244,8 @@ public class BorderCrossingFrame extends JFrame {
             simulationDuration.start();
             // TODO: LOGIKA ZA POKRETANJE SIMULACIJE
             simulation.startThreads();
+            suspendedVehiclesFrame.startReading();
+
         }
         startStopBtn.setText("Zaustavi");
         simulation.setPause(false);

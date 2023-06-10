@@ -1,16 +1,17 @@
 package main.java.org.unibl.etf;
 
 
-import main.java.org.unibl.etf.models.passangers.Passenger;
+
 import main.java.org.unibl.etf.models.terminals.*;
 import main.java.org.unibl.etf.models.vehichles.Bus;
 import main.java.org.unibl.etf.models.vehichles.PersonalVehicle;
 import main.java.org.unibl.etf.models.vehichles.Truck;
 import main.java.org.unibl.etf.models.vehichles.Vehicle;
-import main.java.org.unibl.etf.models.watcher.PropertyChecker;
 
 import java.io.*;
 import java.text.DecimalFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
@@ -29,11 +30,13 @@ public class Simulation {
 
     public final ReentrantLock PAUSE_LOCK = new ReentrantLock();
 
-    private ArrayList<Terminal> terminals = new ArrayList<>();
+    private final ArrayList<Terminal> terminals = new ArrayList<>();
     private volatile boolean pause = false;
     private static final int NUM_OF_BUSES = 5;
-    private static final int NUM_OF_TRUCKS = 10;
+    public static final int NUM_OF_TRUCKS = 10;
     private static final int NUM_OF_PERSONAL_VEHICLES = 35;
+
+    private boolean isSerialized = false;
 
     private Consumer<Vehicle> addVehicle;
     private Consumer<Vehicle> removeVehicle;
@@ -43,13 +46,10 @@ public class Simulation {
 
     private Consumer<String> addMessage;
     public final ArrayList<Vehicle> vehicles;
-
-    private HashMap<Vehicle,ArrayList<Passenger>> vehiclesToRemove;
-    private HashMap<Vehicle,ArrayList<Passenger>> trucksToRemove;
-
     public static Object[][] MATRIX;
     public static final int POLICE_TERMINAL_ROW = 51;
     public static final int CUSTOMS_TERMINAL_ROW = 53;
+    private String fileName;
 
     public static final int TRUCK_POLICE_TERMINAL_COLUMN = 4;
     public boolean isFinished = false;
@@ -67,14 +67,10 @@ public class Simulation {
     }
 
     public Simulation() {
-        vehiclesToRemove = new HashMap<>();
-        trucksToRemove = new HashMap<>();
         MATRIX = new Object[55][5];
-//        Properties properties = loadProperties();
-//        boolean terminalOpen = Boolean.parseBoolean(properties.getProperty("policeTerminalIsInFunction1"));
         vehicles = generateVehicles();
- //       setVehicles(vehicles);
         setTerminals();
+        createSerializationFiles();
         // emptySerializationFolder();
     }
 
@@ -123,11 +119,7 @@ public class Simulation {
             return true;
         } else {
             int random = (int) (Math.random() * 100);
-            if (random < probability) {
-                return true;
-            } else {
-                return false;
-            }
+            return random < probability;
         }
     }
 
@@ -202,6 +194,33 @@ public class Simulation {
         }
     }
 
+    private void createSerializationFiles(){
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy-HH-mm-ss");
+        fileName = currentDateTime.format(formatter);
+
+        try {
+            // Create an empty file for serialization
+            File serializationFile = new File(SERIALIZATION_FOLDER + fileName + ".ser");
+            boolean serializationFileCreated = serializationFile.createNewFile();
+            if(!serializationFileCreated){
+                Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, "Serialization file not created");
+            }
+            // Create an empty file for text input
+            File textInputFile = new File(CUSTOMS_RECORDS_FOLDER + fileName + ".txt");
+            boolean textInputFileCreated = textInputFile.createNewFile();
+            if(!textInputFileCreated){
+                Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, "Text input file not created");
+            }
+        }catch (IOException e){
+            Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, e.fillInStackTrace().toString());
+        }
+    }
+
+    public String getFileName(){
+        return fileName;
+    }
+
     private void emptySerializationFolder() {
         //Delete all files from serialization folder
         deleteFiles(new File(SERIALIZATION_FOLDER));
@@ -255,33 +274,59 @@ public class Simulation {
     }
 
 
-    public synchronized void addVehicleToRemove(Vehicle vehicle, ArrayList<Passenger> passengers) {
-        vehiclesToRemove.put(vehicle, passengers);
+    public synchronized void addVehicleToRemove(Vehicle vehicle, String description) {
+        HashMap<Vehicle,String> vehiclesToRemove = deserializeVehicles();
+        if(vehiclesToRemove.containsKey(vehicle)){
+            //Append description to existing description
+            String existingDescription = vehiclesToRemove.get(vehicle);
+            vehiclesToRemove.put(vehicle, existingDescription+"\n"+ description);
+            serializeVehicles(vehiclesToRemove);
+        }else{
+            vehiclesToRemove.put(vehicle, description);
+            serializeVehicles(vehiclesToRemove);
+        }
     }
 
-    public synchronized void addTruckToRemove(Vehicle vehicle, ArrayList<Passenger> passengers) {
-        trucksToRemove.put(vehicle, passengers);
+    public HashMap<Vehicle,String> getSerializedVehicles(){
+        return deserializeVehicles();
     }
 
-    public HashMap<Vehicle,ArrayList<Passenger>> getVehiclesToRemove(){
-        return vehiclesToRemove;
-    }
-
-    public void serializeVehicles(HashMap<Vehicle,ArrayList<Passenger>> vehiclesToRemove){
+    public void serializeVehicles(HashMap<Vehicle,String> vehiclesToRemove){
         try {
-                // Serialize data object to a file
-                // TODO : Add date to file name
-                ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(Simulation.SERIALIZATION_FOLDER + System.currentTimeMillis() +"_vehicles.ser"));
-                out.writeObject(vehiclesToRemove);
-                out.close();
+            // Load existing serialized data from file, if any
+            HashMap<Vehicle, String> existingData = deserializeVehicles();
+
+            // Merge the existing data with the new data
+            existingData.putAll(vehiclesToRemove);
+
+            // Serialize the updated data
+            ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(SERIALIZATION_FOLDER + fileName + ".ser"));
+            outputStream.writeObject(existingData);
+            isSerialized= true;
             } catch (Exception e) {
                 Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, e.fillInStackTrace().toString());
             }
     }
 
+    private synchronized HashMap<Vehicle, String> deserializeVehicles(){
+        HashMap<Vehicle, String> deserializedMap = new HashMap<>();
+        if(isSerialized) {
+            try {
+                ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(SERIALIZATION_FOLDER + fileName + ".ser"));
+                deserializedMap = (HashMap<Vehicle, String>) inputStream.readObject();  // TODO: YOU KNOW WHAT TO DO
+            } catch (FileNotFoundException e) {
+                // Ignore if the file doesn't exist yet
+            } catch (IOException | ClassNotFoundException e) {
+                System.out.println("An error occurred while deserializing the data.");
+                Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, e.fillInStackTrace().toString());
+            }
+        }
+        return deserializedMap;
+    }
+
     public String getVehicleDescription(int i,int j){
         if(MATRIX[i+45][j] instanceof Vehicle){
-            return ((Vehicle) MATRIX[i+45][j]).toString();
+            return MATRIX[i+45][j].toString();
         }
         return "";
     }

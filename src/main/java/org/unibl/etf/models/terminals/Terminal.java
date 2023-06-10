@@ -3,12 +3,15 @@ package main.java.org.unibl.etf.models.terminals;
 import main.java.org.unibl.etf.Simulation;
 import main.java.org.unibl.etf.models.vehichles.Vehicle;
 
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static main.java.org.unibl.etf.Main.simulation;
 
 public abstract class Terminal {
+
+        protected static final ReentrantLock SERIALIZATION_LOCK = new ReentrantLock();
         private boolean isInFunction;
         protected String alias="";
 

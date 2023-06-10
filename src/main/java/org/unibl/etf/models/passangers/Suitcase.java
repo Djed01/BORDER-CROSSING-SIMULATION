@@ -18,4 +18,11 @@ public class Suitcase implements Serializable {
     public boolean hasNotAllowedStuff(){
         return notAllowedStuff;
     }
+
+    @Override
+    public String toString() {
+        return "Suitcase{" +
+                "notAllowedStuff='" + notAllowedStuff + '\'' +
+                '}';
+    }
 }
