@@ -67,6 +67,7 @@ public class Truck extends Vehicle {
                 " ,needToGenerateDocumentation= " + needToGenerateDocumentation +
                 ", declaredWeight= " + declaredWeight +
                 ", actualWeight= " + actualWeight +
+                ", passengers= " + getPassengers() +
                 '}';
     }
 
