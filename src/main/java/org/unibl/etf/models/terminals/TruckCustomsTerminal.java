@@ -17,6 +17,7 @@ import static main.java.org.unibl.etf.Main.simulation;
 
 public class TruckCustomsTerminal extends CustomsTerminal {
     private String TERMINAL_NAME = "TRUCK CUSTOMS TERMINAL ";
+
     public TruckCustomsTerminal(String alias, boolean isInFunction) {
         super(alias, isInFunction);
     }
@@ -29,7 +30,7 @@ public class TruckCustomsTerminal extends CustomsTerminal {
             checkIfPause();
             if (((Truck) vehicle).isNeedToGenerateDocumentation()) {
                 ((Truck) vehicle).generateDocumentation();
-                simulation.getAddMessage().accept(TERMINAL_NAME +" "+alias+" generated documentation for: "+vehicle.getLabel()+" "+vehicle.getVehicleId());
+                simulation.getAddMessage().accept(TERMINAL_NAME + " " + alias + " generated documentation for: " + vehicle.getLabel() + " " + vehicle.getVehicleId());
             }
             if (((Truck) vehicle).getActualWeight() > ((Truck) vehicle).getDeclaredWeight()) {
                 checkIfPause();
@@ -49,11 +50,11 @@ public class TruckCustomsTerminal extends CustomsTerminal {
         }
     }
 
-    private synchronized void writeRecords(Vehicle vehicle){
+    private synchronized void writeRecords(Vehicle vehicle) {
         try {
-            PrintWriter printWriter = new PrintWriter(new FileOutputStream(new File(Simulation.CUSTOMS_RECORDS_FOLDER + simulation.getFileName() + ".txt"),true));
-            printWriter.println(TERMINAL_NAME+alias+" RECORDS FOR VEHICLE"+vehicle.getLabel() + " " + vehicle.getVehicleId()+":\n");
-            printWriter.println( vehicle.getLabel() + " " + vehicle.getVehicleId() + " had more weight than declared!\n");
+            PrintWriter printWriter = new PrintWriter(new FileOutputStream(new File(Simulation.CUSTOMS_RECORDS_FOLDER + simulation.getFileName() + ".txt"), true));
+            printWriter.println("\n"+TERMINAL_NAME + alias + " RECORDS FOR VEHICLE" + vehicle.getLabel() + " " + vehicle.getVehicleId() + ":\n");
+            printWriter.println(vehicle.getLabel() + " " + vehicle.getVehicleId() + " had more weight than declared!\n");
             printWriter.close();
         } catch (FileNotFoundException e) {
             Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, e.fillInStackTrace().toString());

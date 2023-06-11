@@ -15,6 +15,7 @@ import java.util.Random;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import static main.java.org.unibl.etf.Main.simulation;
 
 public abstract class Vehicle extends Thread implements Serializable {
@@ -39,12 +40,12 @@ public abstract class Vehicle extends Thread implements Serializable {
         counter++;
         this.vehicleId = counter;
         this.numOfPassengers = random.nextInt(maxNumOfPassengers) + 1;
-        for(int i = 0; i < numOfPassengers; i++){
+        for (int i = 0; i < numOfPassengers; i++) {
             String name = (char) (random.nextInt(26) + 'A') + "name";
             String surname = (char) (random.nextInt(26) + 'A') + "surname";
-            if(i==0){
+            if (i == 0) {
                 passengers.add(new Driver(name, surname));
-            }else{
+            } else {
                 passengers.add(new Passenger(name, surname));
             }
         }
@@ -66,19 +67,18 @@ public abstract class Vehicle extends Thread implements Serializable {
         return vehicleId;
     }
 
-    public void setXY(int x, int y){
+    public void setXY(int x, int y) {
         this.x = x;
         this.y = y;
     }
 
-    public void decrementNumOfPassengers(){
+    public void decrementNumOfPassengers() {
         numOfPassengers--;
     }
 
     @Override
-    public String toString(){
-        //Detailed description of the vehicle
-        return this.getClass().getSimpleName()+"{" + "ID=" + vehicleId + " , numOfPassengers= " + numOfPassengers + ", passengers= " + passengers + '}';
+    public String toString() {
+        return this.getClass().getSimpleName() + "{" + "ID=" + vehicleId + " , numOfPassengers= " + numOfPassengers + ", passengers= " + passengers + '}';
     }
 
     @Override
@@ -106,16 +106,16 @@ public abstract class Vehicle extends Thread implements Serializable {
         return y;
     }
 
-    public void suspendVehicle(){
+    public void suspendVehicle() {
         isSuspended = true;
     }
 
-    private  void checkIfPause(){
-        //Ukoliko se igra pauzira, pauziramo i kretanje vozila
+    private void checkIfPause() {
+        //Ukoliko se simulacija pauzira, pauziramo i kretanje vozila
         synchronized (simulation.PAUSE_LOCK) {
             try {
                 if (simulation.isPause())
-                    simulation.PAUSE_LOCK.wait(); //Cekamo dok se igra ne pokrene
+                    simulation.PAUSE_LOCK.wait(); //Cekamo dok se simulacija ne pokrene
             } catch (InterruptedException e) {
                 Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, e.fillInStackTrace().toString());
             }
@@ -141,7 +141,6 @@ public abstract class Vehicle extends Thread implements Serializable {
                         Simulation.MATRIX[y][x] = null;
                         this.y++;
                         simulation.getAddVehicle().accept(this);
-//                        System.out.println("Vehicle " + this.vehicleId + " moved to [" + this.y + "] [" + this.x + "]");
                         LOCK.notifyAll();
                     }
                 } else if (y == 44) {
@@ -151,7 +150,6 @@ public abstract class Vehicle extends Thread implements Serializable {
                         Simulation.MATRIX[y][x] = null;
                         this.y++;
                         simulation.getAddVehicle().accept(this);
-//                        System.out.println("Vehicle " + this.vehicleId + " moved to [" + this.y + "] [" + this.x + "]");
                         LOCK.notifyAll();
                     }
                 } else {
@@ -161,51 +159,48 @@ public abstract class Vehicle extends Thread implements Serializable {
                         Simulation.MATRIX[y][x] = null;
                         this.y++;
                         simulation.getAddQueueVehicle().accept(this);
-//                        System.out.println("Vehicle " + this.vehicleId + " moved to [" + this.y + "] [" + this.x + "]");
                         LOCK.notifyAll();
                     }
                 }
             } else if (this.y == Simulation.POLICE_TERMINAL_ROW - 2) {
                 synchronized (LOCK) {
-                if (Simulation.MATRIX[y + 2][0] instanceof PoliceTerminal && Simulation.MATRIX[y + 2][2] instanceof PoliceTerminal) {
-                    if (Simulation.MATRIX[y + 1][0] == null && ((PoliceTerminal) Simulation.MATRIX[y + 2][0]).isInFunction()) {
+                    if (Simulation.MATRIX[y + 2][0] instanceof PoliceTerminal && Simulation.MATRIX[y + 2][2] instanceof PoliceTerminal) {
+                        if (Simulation.MATRIX[y + 1][0] == null && ((PoliceTerminal) Simulation.MATRIX[y + 2][0]).isInFunction()) {
                             simulation.getRemoveVehicle().accept(this);
                             Simulation.MATRIX[y + 1][0] = this;
                             Simulation.MATRIX[y][x] = null;
                             this.x = 0;
                             this.y++;
                             simulation.getAddVehicle().accept(this);
-//                            System.out.println("Vehicle " + this.vehicleId + " moved to [" + this.y + "] [" + this.x + "]");
                             LOCK.notifyAll();
-                    } else if (Simulation.MATRIX[y + 1][2] == null && ((PoliceTerminal) Simulation.MATRIX[y + 2][2]).isInFunction()) {
+                        } else if (Simulation.MATRIX[y + 1][2] == null && ((PoliceTerminal) Simulation.MATRIX[y + 2][2]).isInFunction()) {
                             simulation.getRemoveVehicle().accept(this);
                             Simulation.MATRIX[y + 1][2] = this;
                             Simulation.MATRIX[y][x] = null;
                             this.x = 2;
                             this.y++;
                             simulation.getAddVehicle().accept(this);
-//                            System.out.println("Vehicle " + this.vehicleId + " moved to [" + this.y + "] [" + this.x + "]");
                             LOCK.notifyAll();
-                    } else {
+                        } else {
                             try {
                                 LOCK.wait();
                             } catch (InterruptedException e) {
                                 Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, e.fillInStackTrace().toString());
                             }
+                        }
                     }
                 }
-            }} else if (this.y == Simulation.POLICE_TERMINAL_ROW - 1) {
-                // Finished checking on police terminal
+            } else if (this.y == Simulation.POLICE_TERMINAL_ROW - 1) {
+                // Finish checking on police terminal
                 if (!this.processedAtPolice) {
                     PoliceTerminal policeTerminal = (PoliceTerminal) (Simulation.MATRIX[y + 1][x]);
                     policeTerminal.checkPassengers(this);
-//                    System.out.println("Vehicle " + this.vehicleId + " finished checking at Police terminal");
                     this.processedAtPolice = true;
                 }
                 checkIfPause();
                 synchronized (LOCK) {
-                if(!this.isSuspended) {
-                    if (Simulation.MATRIX[y + 2][0] != null) {
+                    if (!this.isSuspended) {
+                        if (Simulation.MATRIX[y + 2][0] != null) {
 
                             try {
                                 LOCK.wait();
@@ -213,14 +208,13 @@ public abstract class Vehicle extends Thread implements Serializable {
                                 Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, e.fillInStackTrace().toString());
                             }
 
-                    } else {
+                        } else {
                             simulation.getRemoveVehicle().accept(this);
                             Simulation.MATRIX[y + 2][0] = this;
                             Simulation.MATRIX[y][x] = null;
                             this.y = y + 2;
                             this.x = 0;
                             simulation.getAddVehicle().accept(this);
-//                            System.out.println("Vehicle " + this.vehicleId + " moved to [" + this.y + "] [" + this.x + "]");
                             LOCK.notifyAll();
                         }
                     }
@@ -230,7 +224,6 @@ public abstract class Vehicle extends Thread implements Serializable {
                 CustomsTerminal customsTerminal = (CustomsTerminal) (Simulation.MATRIX[Simulation.CUSTOMS_TERMINAL_ROW][x]);
                 if (customsTerminal.isInFunction()) {
                     customsTerminal.checkPassengers(this);
-//                    System.out.println("Vehicle " + this.vehicleId + " finished checking at Customs terminal");
                     checkIfPause();
                     if (!this.isSuspended) {
                         // Finished checking on customs terminal
@@ -240,23 +233,22 @@ public abstract class Vehicle extends Thread implements Serializable {
                             Simulation.MATRIX[y][x] = null;
                             this.y = y + 2;
                             simulation.getAddVehicle().accept(this);
-//                            System.out.println("Vehicle " + this.vehicleId + " CROSSING BORDER");
                             isFinished = true;
                             LOCK.notifyAll();
                         }
                     }
                 }
             } else {
-                    synchronized (LOCK) {
-                        try {
-                            LOCK.wait();
-                        } catch (InterruptedException e) {
-                            Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, e.fillInStackTrace().toString());
-                        }
+                synchronized (LOCK) {
+                    try {
+                        LOCK.wait();
+                    } catch (InterruptedException e) {
+                        Logger.getLogger(Simulation.class.getName()).log(Level.SEVERE, e.fillInStackTrace().toString());
                     }
                 }
+            }
 
-            if(this.isSuspended){
+            if (this.isSuspended) {
                 synchronized (LOCK) {
                     simulation.removeVehicle(this);
                     LOCK.notifyAll();

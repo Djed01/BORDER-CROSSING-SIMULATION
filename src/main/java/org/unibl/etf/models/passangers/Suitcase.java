@@ -7,15 +7,15 @@ import java.io.Serializable;
 public class Suitcase implements Serializable {
     private boolean notAllowedStuff;
 
-    public Suitcase(){
-        if(Simulation.generateBool(10)){
+    public Suitcase() {
+        if (Simulation.generateBool(10)) {
             this.notAllowedStuff = true;
-        }else{
+        } else {
             this.notAllowedStuff = false;
         }
     }
 
-    public boolean hasNotAllowedStuff(){
+    public boolean hasNotAllowedStuff() {
         return notAllowedStuff;
     }
 

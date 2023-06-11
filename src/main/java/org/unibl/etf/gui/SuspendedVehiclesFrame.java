@@ -11,11 +11,12 @@ import java.util.HashMap;
 import static main.java.org.unibl.etf.Main.simulation;
 
 public class SuspendedVehiclesFrame extends JFrame {
-    private   Thread mapReader;
+    private Thread mapReader;
     private JPanel contentPane;
     private JLabel[][] matrixLabel;
 
     private JTextArea vehicleDescription;
+
     public SuspendedVehiclesFrame() {
         setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
         setBounds(100, 50, 900, 900);
@@ -51,14 +52,14 @@ public class SuspendedVehiclesFrame extends JFrame {
 
     }
 
-    public void startReading(){
+    public void startReading() {
         mapReader.start();
     }
 
-    public void showVehicles(HashMap<Vehicle,String> vehicleMap){
-        int i=0;
-        int j=0;
-        for(Vehicle vehicle:vehicleMap.keySet()){
+    public void showVehicles(HashMap<Vehicle, String> vehicleMap) {
+        int i = 0;
+        int j = 0;
+        for (Vehicle vehicle : vehicleMap.keySet()) {
             synchronized (matrixLabel) {
                 matrixLabel[i][j].addMouseListener(new MouseAdapter() {
                     @Override
@@ -71,8 +72,8 @@ public class SuspendedVehiclesFrame extends JFrame {
                 labelUp.setOpaque(true);
                 labelUp.setBackground(vehicle.getColor());
                 j++;
-                if(j%10==0){
-                    j=0;
+                if (j % 10 == 0) {
+                    j = 0;
                     i++;
                 }
             }
@@ -81,7 +82,6 @@ public class SuspendedVehiclesFrame extends JFrame {
 
 
     private Thread mapReader() {
-        //Mjerenje vremena na nacin da nit postavimo u sleep mode jednu sekundu te nakon toga povecavamo brojace
         return new Thread(() -> {
             while (true) {
                 try {
@@ -92,5 +92,5 @@ public class SuspendedVehiclesFrame extends JFrame {
                 }
             }
         });
-        }
+    }
 }

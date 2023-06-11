@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 public class QueueFrame extends JFrame {
     private JPanel contentPane;
     private JLabel[][] matrixLabel;
+
     public QueueFrame() {
         setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
         setBounds(100, 50, 900, 900);
@@ -36,7 +37,7 @@ public class QueueFrame extends JFrame {
         Main.simulation.setRemoveQueueVehicle(removeVehicleQueueConsumer);
     }
 
-    //Prikaz automobila na GUI-u
+    //Prikaz vozila na GUI-u
     Consumer<Vehicle> addVehicleQueueConsumer = (vehicle) -> SwingUtilities.invokeLater(() -> {
         synchronized (matrixLabel) {
             JLabel labelUp = matrixLabel[vehicle.getY()][vehicle.getX()];
@@ -46,7 +47,7 @@ public class QueueFrame extends JFrame {
         }
     });
 
-    //Uklanjanje figure sa GUI-a
+    //Uklanjanje vozila sa GUI-a
     Consumer<Vehicle> removeVehicleQueueConsumer = (vehicle) -> {
         synchronized (matrixLabel) {
             JLabel labelUp = matrixLabel[vehicle.getY()][vehicle.getX()];

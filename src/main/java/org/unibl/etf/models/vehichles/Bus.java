@@ -6,20 +6,18 @@ import main.java.org.unibl.etf.models.passangers.Suitcase;
 import java.awt.*;
 import java.util.HashMap;
 
-public class Bus extends Vehicle{
+public class Bus extends Vehicle {
     private static final int MAX_NUM_OF_PASSENGERS = 52;
-
-
     private HashMap<Passenger, Suitcase> CargoSpace = new HashMap<>();
-    public Bus(){
+
+    public Bus() {
         super(MAX_NUM_OF_PASSENGERS);
         color = Color.YELLOW;
-        for(Passenger passenger : super.getPassengers()){
-            if(passenger.getSuitcase() != null){
+        for (Passenger passenger : super.getPassengers()) {
+            if (passenger.getSuitcase() != null) {
                 CargoSpace.put(passenger, passenger.getSuitcase());
             }
         }
     }
-
 
 }

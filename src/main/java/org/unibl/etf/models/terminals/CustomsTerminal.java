@@ -17,9 +17,10 @@ import java.util.logging.Logger;
 
 import static main.java.org.unibl.etf.Main.simulation;
 
-public class CustomsTerminal extends Terminal{
-    protected  int TIME_TO_CHECK_PASSENGER;
+public class CustomsTerminal extends Terminal {
+    protected int TIME_TO_CHECK_PASSENGER;
     private String TERMINAL_NAME = "CUSTOMS TERMINAL ";
+
     public CustomsTerminal() {
         super();
     }
@@ -33,19 +34,19 @@ public class CustomsTerminal extends Terminal{
         super(isInFunction);
     }
 
-    public void checkPassengers(Vehicle vehicle){
+    public void checkPassengers(Vehicle vehicle) {
         StringBuilder description = new StringBuilder();
         ArrayList<Passenger> passengersToRemove = new ArrayList<>();
-        if(vehicle instanceof Bus){
+        if (vehicle instanceof Bus) {
             TIME_TO_CHECK_PASSENGER = 100;
-            simulation.getAddMessage().accept(TERMINAL_NAME+alias+": Checking passengers in vehicle: " + vehicle.getLabel() + " " + vehicle.getVehicleId());
+            simulation.getAddMessage().accept(TERMINAL_NAME + alias + ": Checking passengers in vehicle: " + vehicle.getLabel() + " " + vehicle.getVehicleId());
             description.append(vehicle.getLabel()).append(" ").append(vehicle.getVehicleId()).append(":\n\n");
-            for(Passenger passenger: vehicle.getPassengers()){
+            for (Passenger passenger : vehicle.getPassengers()) {
                 checkIfPause();
-                if(passenger.hasSuitcase()){
-                    if(passenger.getSuitcase().hasNotAllowedStuff()){
-                        simulation.getAddMessage().accept(TERMINAL_NAME+alias+": Passenger has not allowed stuff, removing passenger: " + passenger +"in vehicle: " + vehicle.getLabel() + " " + vehicle.getVehicleId());
-                        description.append(TERMINAL_NAME+alias+": "+passenger+" had not allowed stuff. Removed from vehicle!\n");
+                if (passenger.hasSuitcase()) {
+                    if (passenger.getSuitcase().hasNotAllowedStuff()) {
+                        simulation.getAddMessage().accept(TERMINAL_NAME + alias + ": Passenger has not allowed stuff, removing passenger: " + passenger + "in vehicle: " + vehicle.getLabel() + " " + vehicle.getVehicleId());
+                        description.append(TERMINAL_NAME).append(alias).append(": ").append(passenger).append(" had not allowed stuff. Removed from vehicle!\n");
                         passengersToRemove.add(passenger);
                     }
                 }
@@ -57,8 +58,8 @@ public class CustomsTerminal extends Terminal{
             }
 
 
-            if(passengersToRemove.size() > 0) {
-                for(Passenger passenger: passengersToRemove) {
+            if (passengersToRemove.size() > 0) {
+                for (Passenger passenger : passengersToRemove) {
                     vehicle.getPassengers().remove(passenger);
                     vehicle.decrementNumOfPassengers();
                 }
@@ -68,9 +69,9 @@ public class CustomsTerminal extends Terminal{
                 }
                 simulation.addVehicleToRemove(vehicle, description.toString());
             }
-        }
-        else if(vehicle instanceof PersonalVehicle){
+        } else if (vehicle instanceof PersonalVehicle) {
             TIME_TO_CHECK_PASSENGER = 2000;
+            simulation.getAddMessage().accept(TERMINAL_NAME + alias + ": Checking passengers in vehicle: " + vehicle.getLabel() + " " + vehicle.getVehicleId());
             try {
                 Thread.sleep(TIME_TO_CHECK_PASSENGER);
             } catch (InterruptedException e) {
@@ -80,10 +81,10 @@ public class CustomsTerminal extends Terminal{
     }
 
 
-    private synchronized void writeRecords(Vehicle vehicle, ArrayList<Passenger> passengersToRemove){
+    private synchronized void writeRecords(Vehicle vehicle, ArrayList<Passenger> passengersToRemove) {
         try {
-            PrintWriter printWriter = new PrintWriter(new FileOutputStream(new File(Simulation.CUSTOMS_RECORDS_FOLDER + simulation.getFileName() + ".txt"),true));
-            printWriter.println("\n"+TERMINAL_NAME+alias+" RECORDS FOR VEHICLE "+vehicle.getLabel() + " " + vehicle.getVehicleId()+":\n");
+            PrintWriter printWriter = new PrintWriter(new FileOutputStream(new File(Simulation.CUSTOMS_RECORDS_FOLDER + simulation.getFileName() + ".txt"), true));
+            printWriter.println("\n" + TERMINAL_NAME + alias + " RECORDS FOR VEHICLE " + vehicle.getLabel() + " " + vehicle.getVehicleId() + ":\n");
             for (Passenger passenger : passengersToRemove) {
                 printWriter.println(passenger + " had not allowed stuff.");
             }

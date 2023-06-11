@@ -15,7 +15,7 @@ public class IdentificationDocument implements Serializable {
         this.isNotValid = Simulation.generateBool(3);
     }
 
-    public boolean isNotValid(){
+    public boolean isNotValid() {
         return isNotValid;
     }
 }

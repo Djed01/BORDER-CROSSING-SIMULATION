@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+
 import static main.java.org.unibl.etf.Main.simulation;
 
 public class BorderCrossingFrame extends JFrame {
@@ -87,7 +88,7 @@ public class BorderCrossingFrame extends JFrame {
         setTerminals();
         this.getContentPane().add(centralPanel);
 
-        title = new JLabel("Border Crossing Simulation");
+        title = new JLabel("Border Crossing Simulation",SwingConstants.CENTER);
         title.setBounds(233, 0, 633, 72);
         this.getContentPane().add(title);
         title.setForeground(new Color(161, 2, 2));
@@ -215,7 +216,7 @@ public class BorderCrossingFrame extends JFrame {
             while (!simulation.isFinished) {
                 if (!simulation.isPause()) {
                     String time = String.format("%d h %d m %d s", hours, minutes, seconds);
-                    this.timerLabel.setText("<html><div style='text-align: center;'>Vrijeme trajanja simulacije:<br>" + time + "</div></html>");
+                    this.timerLabel.setText("<html><div style='text-align: center;'>Simulation time:<br>" + time + "</div></html>");
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {
@@ -232,7 +233,7 @@ public class BorderCrossingFrame extends JFrame {
                     }
                 }
             }
-          startStopBtn.setEnabled(false);
+            startStopBtn.setEnabled(false);
         });
     }
 
@@ -242,17 +243,15 @@ public class BorderCrossingFrame extends JFrame {
             //Pokretanje niti
             Thread simulationDuration = timer();
             simulationDuration.start();
-            // TODO: LOGIKA ZA POKRETANJE SIMULACIJE
             simulation.startThreads();
             suspendedVehiclesFrame.startReading();
-
         }
-        startStopBtn.setText("Zaustavi");
+        startStopBtn.setText("Pause");
         simulation.setPause(false);
     }
 
     private void pauseSimulation() {
-        startStopBtn.setText("Pokreni");
+        startStopBtn.setText("Resume");
         simulation.setPause(true);
     }
 

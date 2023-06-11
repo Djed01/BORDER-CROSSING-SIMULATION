@@ -1,8 +1,8 @@
 package main.java.org.unibl.etf.models.passangers;
 
-public class Driver extends Passenger{
+public class Driver extends Passenger {
 
-    public Driver(String name, String surname){
+    public Driver(String name, String surname) {
         super(name, surname);
     }
 }
