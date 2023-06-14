@@ -1,0 +1,19 @@
+
+CUSTOMS TERMINAL C1 RECORDS FOR VEHICLE B 3:
+
+Passenger{name='Dname', surname='Gsurname', suitcase='Suitcase{notAllowedStuff='true'}'} had not allowed stuff.
+Passenger{name='Fname', surname='Csurname', suitcase='Suitcase{notAllowedStuff='true'}'} had not allowed stuff.
+
+CUSTOMS TERMINAL C1 RECORDS FOR VEHICLE B 2:
+
+Passenger{name='Jname', surname='Csurname', suitcase='Suitcase{notAllowedStuff='true'}'} had not allowed stuff.
+
+TRUCK CUSTOMS TERMINAL CK RECORDS FOR VEHICLET 6:
+
+T 6 had more weight than declared!
+
+
+CUSTOMS TERMINAL C1 RECORDS FOR VEHICLE B 5:
+
+Passenger{name='Cname', surname='Asurname', suitcase='Suitcase{notAllowedStuff='true'}'} had not allowed stuff.
+Passenger{name='Pname', surname='Wsurname', suitcase='Suitcase{notAllowedStuff='true'}'} had not allowed stuff.

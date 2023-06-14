@@ -1,0 +1,14 @@
+
+CUSTOMS TERMINAL C1 RECORDS FOR VEHICLE B 3:
+
+Passenger{name='Sname', surname='Gsurname', suitcase='Suitcase{notAllowedStuff='true'}'} had not allowed stuff.
+
+CUSTOMS TERMINAL C1 RECORDS FOR VEHICLE B 4:
+
+Passenger{name='Wname', surname='Hsurname', suitcase='Suitcase{notAllowedStuff='true'}'} had not allowed stuff.
+
+CUSTOMS TERMINAL C1 RECORDS FOR VEHICLE B 2:
+
+Passenger{name='Vname', surname='Dsurname', suitcase='Suitcase{notAllowedStuff='true'}'} had not allowed stuff.
+Passenger{name='Vname', surname='Fsurname', suitcase='Suitcase{notAllowedStuff='true'}'} had not allowed stuff.
+Passenger{name='Pname', surname='Ssurname', suitcase='Suitcase{notAllowedStuff='true'}'} had not allowed stuff.
